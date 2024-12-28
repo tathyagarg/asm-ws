@@ -37,12 +37,19 @@ section .data
     style_css_len equ $ - style_css
 
     ; ============= Responses =============
-    http_200:
+    html_http_200:
         db      "HTTP/1.1 200 OK",                 0dh, 0ah
         db      "Server: Tathya's Awesome Server", 0dh, 0ah
         db      "Content-Type: text/html",           0dh, 0ah
-        db      0dh, 0ah, 0h
-    http_200_len equ $ - http_200
+        db      0dh, 0ah
+    html_http_200_len equ $ - html_http_200
+
+    css_http_200:
+        db      "HTTP/1.1 200 OK",                 0dh, 0ah
+        db      "Server: Tathya's Awesome Server", 0dh, 0ah
+        db      "Content-Type: text/css",           0dh, 0ah
+        db      0dh, 0ah
+    css_http_200_len equ $ - css_http_200
 
 section .bss
     socket_addr resq    1  ; Declare 8 bytes of uninitialized memory
@@ -150,22 +157,27 @@ process_request:
     jle  close_client
     mov  [html_file_ptr], rax
 
-    mov  rdi, style_css
-    call so_open_file
-    cmp  rax, 0
-    jle  close_client
-    mov  [css_file_ptr], rax
+    ; mov  rdi, style_css
+    ; call so_open_file
+    ; cmp  rax, 0
+    ; jle  close_client
+    ; mov  [css_file_ptr], rax
 
     mov  rcx, qword 0
 
 send_headers:
     mov  rdi, [client]
-    mov  rsi, http_200
-    mov  rdx, http_200_len
+    mov  rsi, html_http_200
+    mov  rdx, html_http_200_len
     call so_write_socket
 
     mov  rbx, [html_file_ptr]
     call send_file
+
+    ; mov  rdi, [client]
+    ; mov  rsi, css_http_200
+    ; mov  rdx, css_http_200_len
+    ; call so_write_socket
     ; mov  rbx, [css_file_ptr]
     ; call send_file
 
