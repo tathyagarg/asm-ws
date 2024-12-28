@@ -9,7 +9,7 @@
 ; protocol: 0 (Default Protocol)
 ; 
 ; Returns: socket file descriptor
-create_socket:
+so_create_socket:
     mov     rax, 41                  ; sys_socket()
     mov     rdi, 2                   ; AF_INET
     mov     rsi, 1                   ; SOCK_STREAM
@@ -24,14 +24,12 @@ create_socket:
 ;     Source: https://pubs.opengroup.org/onlinepubs/009695399/functions/shutdown.html
 ;
 ; The opcode for sys_shutdown() is 48
-; socket: socket file descriptor
+; socket: socket file descriptor (provided by caller in rdi)
 ; how: 2 (SHUT_RDWR) - Disables further send and receive operations
 ; 
 ; Returns: 0 on success, -1 on error
-close_socket:
-    push rax
+so_close_socket:
     mov     rax, 48                  ; sys_shutdown()
-    pop     rdi                      ; Load socket file descriptor
     mov     rsi, 2                   ; SHUT_RDWR
     syscall
     ret
@@ -44,15 +42,106 @@ close_socket:
 ; socket: socket file descriptor (provided by caller in rdi)
 ; level: SOL_SOCKET = 1
 ; option_name: SO_REUSEADDR = 2
-; option_value: 1 (Enable)
-; option_len: sizeof(int) = 4 bytes = 32 bits
+; option_value: 1 (Enable), (provided by caller in r10)
+; option_len: sizeof(int) = 4 bytes
 ;
 ; Returns: 0 on success, -1 on error
-set_socket_options:
+so_set_socket_options:
     mov     rax, 54                  ; sys_setsockopt()
     mov     rsi, 1                   ; SOL_SOCKET
     mov     rdx, 2                   ; SO_REUSEADDR
-    mov     r10, 1                   ; Load option_value
-    mov     r8,  4                   ; Load option_len
+    mov     r8,  dword 4             ; Load option_len
+    syscall
+    ret
+
+; ======= Bind Socket =======
+; int bind(int socket, const struct sockaddr *address, socklen_t address_len)
+;    Source: https://pubs.opengroup.org/onlinepubs/009695399/functions/bind.html
+;
+; The opcode for sys_bind() is 49
+; socket: socket file descriptor (provided by caller in rdi)
+; address: pointer to sockaddr structure (provided by caller in rsi)
+; address_len: sizeof(sockaddr) = 16 bytes (confusing, but it's the size of the structure)
+; 
+; Returns: 0 on success, -1 on error
+so_bind_socket:
+    mov     rax, 49                  ; sys_bind()
+    mov     rdx, 16                  ; Load 16 byte socket address size
+    syscall
+    ret
+
+; ======= Listen =======
+; int listen(int socket, int backlog)
+;    Source: https://pubs.opengroup.org/onlinepubs/009695399/functions/listen.html
+;
+; The opcode for sys_listen() is 50
+; socket: socket file descriptor (provided by caller in rdi)
+; backlog: Maximum number of pending connections (provided by caller in rsi)
+;
+; Returns: 0 on success, -1 on error
+so_listen:
+    mov     rax, 50                  ; sys_listen()
+    syscall
+    ret
+
+; ======= Accept Connection =======
+; int accept(int socket, struct sockaddr *restrict address, socklen_t *restrict address_len)
+;    Source: https://pubs.opengroup.org/onlinepubs/009695399/functions/accept.html
+;
+; The opcode for sys_accept() is 43
+; socket: socket file descriptor (provided by caller in rdi)
+; address: NULL (we don't need the client address)
+; address_len: NULL (we don't need the client address length)
+;
+; Returns: socket file descriptor on success, -1 on error
+so_accept_connection:
+    mov     rax, 43                  ; sys_accept()
+    mov     rsi, 0                   ; NULL
+    mov     rdx, 0                   ; NULL
+    syscall
+    ret
+
+; ======= Read from Socket =======
+; ssize_t read(int fd, void *buf, size_t count)
+;    Source: https://pubs.opengroup.org/onlinepubs/009695399/functions/read.html
+;
+; The opcode for sys_read() is 0
+; fd: File Descriptor (provided by caller in rdi)
+; buf: Buffer to read into (provided by caller in rsi)
+; count: Number of bytes to read (provided by caller in rdx)
+;
+; Returns: Number of bytes read on success, -1 on error
+so_read_socket:
+    mov     rax, 0                   ; sys_read()
+    syscall
+    ret
+
+; ======= Read HTML =======
+; int open(const char *path, int oflag)
+;    Source: https://pubs.opengroup.org/onlinepubs/009695399/functions/open.html
+;
+; The opcode for sys_open() is 2
+; path: Path to the file (provided by caller in rdi)
+; oflag: O_RDONLY = 0 (Read Only)
+;
+; Returns: File descriptor on success, -1 on error
+so_open_file:
+    mov     rax, 2                   ; sys_open()
+    mov     rsi, 0                   ; O_RDONLY
+    syscall
+    ret
+
+; ======= Write to Socket =======
+; ssize_t write(int fd, const void *buf, size_t count)
+;    Source: https://pubs.opengroup.org/onlinepubs/009695399/functions/write.html
+;
+; The opcode for sys_write() is 1
+; fd: File Descriptor (provided by caller in rdi)
+; buf: Buffer to write (provided by caller in rsi)
+; count: Number of bytes to write (provided by caller in rdx)
+;
+; Returns: Number of bytes written on success, -1 on error
+so_write_socket:
+    mov     rax, 1                   ; sys_write()
     syscall
     ret
