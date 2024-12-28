@@ -40,6 +40,9 @@ _start:
     add  rsp, 8                          ; Add to the stack pointer to restore its position 
     pop  rbp                             ; Restore original stack pointer
 
+    mov  rdi, [socket]
+    call set_socket_options
+
     call close_socket
     call quit
 

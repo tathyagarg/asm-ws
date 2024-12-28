@@ -1,4 +1,5 @@
 # Assembly Webserver
+A little webserver I wrote in x86-64 Assembly. There are a TON of comments because I can't understand what's going on without them.
 
 ## An Overview of the Assembly you need to know
 In assembly tutorials, you will often see people using `int 0x80` or `int 80h`.

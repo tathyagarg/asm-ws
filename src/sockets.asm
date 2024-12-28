@@ -35,3 +35,24 @@ close_socket:
     mov     rsi, 2                   ; SHUT_RDWR
     syscall
     ret
+
+; ======= Set Socket options =======
+; int setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len)
+;    Source: https://pubs.opengroup.org/onlinepubs/009695399/functions/setsockopt.html
+;
+; The opcode for sys_setsockopt() is 54
+; socket: socket file descriptor (provided by caller in rdi)
+; level: SOL_SOCKET = 1
+; option_name: SO_REUSEADDR = 2
+; option_value: 1 (Enable)
+; option_len: sizeof(int) = 4 bytes = 32 bits
+;
+; Returns: 0 on success, -1 on error
+set_socket_options:
+    mov     rax, 54                  ; sys_setsockopt()
+    mov     rsi, 1                   ; SOL_SOCKET
+    mov     rdx, 2                   ; SO_REUSEADDR
+    mov     r10, 1                   ; Load option_value
+    mov     r8,  4                   ; Load option_len
+    syscall
+    ret
