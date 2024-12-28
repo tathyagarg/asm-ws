@@ -14,6 +14,7 @@ OBJ = $(SRC:.asm=.o)
 BIN = server
 
 all:
+	clear
 	$(ASSEMBLER) -f $(FORMAT) $(SRC_DIR)/$(SRC) -o $(OBJ_DIR)/$(OBJ)
 	$(LINKER) $(OBJ_DIR)/$(OBJ) -o $(BIN_DIR)/$(BIN)
 
