@@ -1,4 +1,3 @@
 reference/
-# Nest doesn't have nasm
-# bin/
+bin/
 obj/
