@@ -46,7 +46,13 @@
   "        db                                              0dh, 0ah\n"         \
   "    png_http_200_len equ $ - png_http_200\n"                                \
   "\n"                                                                         \
-  "    fl_not_found db \"templates/not_found.html\",         0h\n\n"                                \
+  "    not_found_http_404:\n"                                                  \
+  "        db      \"HTTP/1.1 404 Not Found\",               0dh, 0ah\n"         \
+  "        db      \"Server: Tathya's Awesome Server\",      0dh, 0ah\n"         \
+  "        db      \"Content-Type: text/html\",              0dh, 0ah\n"         \
+  "        db                                              0dh, 0ah\n"         \
+  "    not_found_http_404_len equ $ - not_found_http_404\n"                    \
+  "    fl_not_found db \"templates/not_found.html\",         0h\n\n"           \
 
 #define TEXT                                                                   \
   "section .text\n"                                                            \
@@ -109,16 +115,6 @@ void write_data(FILE *wfile, FILE* rfile) {
         strcpy(curr_file_location + 3, ep_normalized);
 
         fprintf(wfile, "    %s", curr_file_location);
-        // Write the file location
-        // for (long unsigned int i = 0; i < sizeof(file_location) / sizeof(char); i++) {
-        //     if (file_location[i] == '\0') {
-        //         break;
-        //     }
-        //     // char curr = file_location[i] == '/' || file_location[i] == '.' ? '_' : file_location[i];
-        //     curr_file_location[i + 3] = curr;
-
-        //     fprintf(wfile, "%c", curr);
-        // }
         fprintf(wfile, "     db \"%s/%s\", 0h\n\n", ROOT_FOLDER, file_location);
 
         strcpy(eps[line], ep_normalized);
@@ -135,6 +131,8 @@ void write_data(FILE *wfile, FILE* rfile) {
         fprintf(wfile, "    .%s:\n", eps[i]);
         if (i == line) {
             fprintf(wfile, "        mov  rdi, fl_not_found\n");
+            fprintf(wfile, "        mov  r9, not_found_http_404\n");
+            fprintf(wfile, "        mov  r8, not_found_http_404_len\n");
         } else {
             fprintf(wfile, "        mov  rdi, %s\n", eps[i]);
             fprintf(wfile, "        mov  rcx, r10\n");

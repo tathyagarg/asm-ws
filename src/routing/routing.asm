@@ -41,10 +41,19 @@ section .data
         db                                              0dh, 0ah
     png_http_200_len equ $ - png_http_200
 
+    not_found_http_404:
+        db      "HTTP/1.1 404 Not Found",               0dh, 0ah
+        db      "Server: Tathya's Awesome Server",      0dh, 0ah
+        db      "Content-Type: text/html",              0dh, 0ah
+        db                                              0dh, 0ah
+    not_found_http_404_len equ $ - not_found_http_404
     fl_not_found db "templates/not_found.html",         0h
 
     ep_     db "/", 0h
     fl_ep_     db "templates/home/index.html", 0h
+
+    ep_404     db "/404", 0h
+    fl_ep_404     db "templates/not_found.html", 0h
 
     ep_index_html     db "/index.html", 0h
     fl_ep_index_html     db "templates/home/index.html", 0h
@@ -80,8 +89,17 @@ process_file:
         mov  rcx, r10
         call f_match_path
         cmp  rax, 1
-        jne  .ep_index_html
+        jne  .ep_404
         mov  rdi, fl_ep_
+        ret
+
+    .ep_404:
+        mov  rdi, ep_404
+        mov  rcx, r10
+        call f_match_path
+        cmp  rax, 1
+        jne  .ep_index_html
+        mov  rdi, fl_ep_404
         ret
 
     .ep_index_html:
@@ -122,5 +140,7 @@ process_file:
 
     .not_found:
         mov  rdi, fl_not_found
+        mov  r9, not_found_http_404
+        mov  r8, not_found_http_404_len
         ret
 
