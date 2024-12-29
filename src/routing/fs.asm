@@ -58,3 +58,51 @@ f_match_file_ext:
         pop  rsi
         ret
 
+f_process_file_ext:
+    mov  rdi, HTML_EXT
+    mov  rcx, r10
+    mov  r9,  HTML_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .html
+
+    mov  rdi, CSS_EXT 
+    mov  rcx, r10
+    mov  r9,  CSS_EXT_LEN 
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .css
+
+    mov  rdi, JS_EXT 
+    mov  rcx, r10
+    mov  r9,  JS_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .js
+
+    mov  rdi, PNG_EXT 
+    mov  rcx, r10
+    mov  r9,  PNG_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .png
+
+    .html:
+        mov  r9, html_http_200
+        mov  r8, html_http_200_len
+        ret
+
+    .css:
+        mov  r9, css_http_200
+        mov  r8, css_http_200_len
+        ret
+
+    .js:
+        mov  r9, js_http_200
+        mov  r8, js_http_200_len
+        ret
+
+    .png:
+        mov  r9, png_http_200
+        mov  r8, png_http_200_len
+        ret
