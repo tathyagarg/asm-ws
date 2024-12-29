@@ -1,6 +1,3 @@
-%include 'src/functions.asm'
-%include 'src/sockets.asm'
-
 section .data
     socket      dq      0
     socket_on   dq      1
@@ -11,7 +8,6 @@ section .data
     res_buf     TIMES   buf_len db 0     ; Response buffer
 
     req_len     dq      0                ; Request length
-
 
     DEBUG       dq      1
 
@@ -40,22 +36,46 @@ section .data
     html_http_200:
         db      "HTTP/1.1 200 OK",                 0dh, 0ah
         db      "Server: Tathya's Awesome Server", 0dh, 0ah
-        db      "Content-Type: text/html",           0dh, 0ah
+        db      "Content-Type: text/html",         0dh, 0ah
         db      0dh, 0ah
     html_http_200_len equ $ - html_http_200
 
     css_http_200:
         db      "HTTP/1.1 200 OK",                 0dh, 0ah
         db      "Server: Tathya's Awesome Server", 0dh, 0ah
-        db      "Content-Type: text/css",           0dh, 0ah
+        db      "Content-Type: text/css",          0dh, 0ah
         db      0dh, 0ah
     css_http_200_len equ $ - css_http_200
 
+    ; ============= Methods =============
+    GET        db       "GET",    0h
+    GET_LEN    equ      $ - GET
+
+    POST       db       "POST",   0h
+    POST_LEN   equ      $ - POST
+
+    PUT        db       "PUT",    0h
+    PUT_LEN    equ      $ - PUT
+
+    DELETE     db       "DELETE", 0h
+    DELETE_LEN equ      $ - DELETE
+
+    idx_GET    equ      0
+    idx_POST   equ      1
+    idx_PUT    equ      2
+    idx_DELETE equ      3
+
 section .bss
     socket_addr resq    1  ; Declare 8 bytes of uninitialized memory
+    method      resb    32
+    path        resb    256
 
 section .text
 global _start
+
+%include 'src/functions.asm'
+%include 'src/sockets.asm'
+%include 'src/parser.asm'
 
 error_handler:
     cmp  rax, 0
@@ -159,10 +179,52 @@ accept:
 
     ; Print the request headers, if DEBUG
     cmp  dword [DEBUG], 0
-    je   process_request
+    je   parse_headers
     mov  rsi, req_buf
     mov  rdx, [req_len]
     call print
+
+parse_headers:
+    mov  rsi, req_buf
+    call p_parse_headers
+
+    cmp  dword [DEBUG], 0
+    je   process_request
+
+    cmp  word [method], idx_GET
+    je   .print_get 
+
+    cmp  word [method], idx_POST
+    je   .print_post 
+
+    cmp  word [method], idx_PUT
+    je   .print_put
+
+    cmp  word [method], idx_DELETE
+    je   .print_delete
+
+    .print_get:
+        mov  rsi, GET
+        mov  rdx, GET_LEN
+        jmp  ._print 
+    
+    .print_post:
+        mov  rsi, POST
+        mov  rdx, POST_LEN
+        jmp  ._print 
+
+    .print_put:
+        mov  rsi, PUT
+        mov  rdx, PUT_LEN
+        jmp  ._print 
+
+    .print_delete:
+        mov  rsi, DELETE
+        mov  rdx, DELETE_LEN
+        jmp  ._print
+
+    ._print:
+        call print
 
 process_request:
     ; Open the index.html file, read it's contents, store them in html_file_ptr
