@@ -16,12 +16,45 @@ f_match_path:
         jnz  .match_path
 
     .match:
-        pop  rsi
         mov  rax, 1
-        ret
+        jmp  .done
 
     .no_match:
-        pop  rsi
         mov  rax, 0
-        ret
+        jmp  .done
     
+    .done:
+        pop  rsi
+        ret
+
+; ========== Match File Extension ==========
+; Compares the file name in rsi to the given extension in rdi
+;
+; Returns 1 if the extensions match, 0 otherwise
+f_match_file_ext:
+    push rsi
+    add  rsi, rcx
+    dec  rsi
+
+    .match_ext:
+        mov  al, [rsi]
+        cmp  al, [rdi]
+        jne  .no_match
+        dec  rsi
+        inc  rdi
+        dec  r9
+        cmp  r9, 1
+        jne  .match_ext
+
+    .match:
+        mov  rax, 1
+        jmp  .done
+
+    .no_match:
+        mov  rax, 0
+        jmp  .done
+    
+    .done:
+        pop  rsi
+        ret
+

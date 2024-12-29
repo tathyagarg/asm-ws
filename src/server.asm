@@ -225,8 +225,8 @@ process_request:
     mov  rsi, path
     mov  r10, [path_len]
     call process_file
-    push rsi
-    push rdx
+    push r9
+    push r8
 
 send_headers:
     call so_open_file

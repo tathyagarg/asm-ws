@@ -1,4 +1,17 @@
 section .data
+    ; ============= File Exts (Backwards) =============
+    HTML_EXT     db      "lmth", 0h
+    HTML_EXT_LEN equ     $ - HTML_EXT
+
+    CSS_EXT      db      "ssc",  0h
+    CSS_EXT_LEN  equ     $ - CSS_EXT
+
+    JS_EXT       db      "sj",   0h
+    JS_EXT_LEN   equ     $ - JS_EXT
+
+    PNG_EXT      db      "gnp",  0h
+    PNG_EXT_LEN  equ     $ - PNG_EXT
+
     ; ============= Files =============
     index_html:
         db      "templates/home/index.html", 0h
@@ -61,8 +74,19 @@ section .text
 global process_file
 
 %include 'src/routing/fs.asm'
+%include 'src/functions.asm'
 
+; ============= Process File =============
+; Checks if the path matches any of the files
+;
+; If it does, it sends the file
+; r10 holds the length of the path
+; rsi holds the path
 process_file:
+    push rsi
+    call _process_file_ext
+    pop  rsi
+
     mov  rdi, home
     mov  rcx, r10
     call f_match_path
@@ -89,25 +113,65 @@ process_file:
 
     .send_home:
         mov  rdi, index_html
-        mov  rsi, html_http_200
-        mov  rdx, html_http_200_len
         ret
     
     .send_home_css:
         mov  rdi, style_css
-        mov  rsi, css_http_200
-        mov  rdx, css_http_200_len
         ret
 
     .send_home_js:
         mov  rdi, script_js
-        mov  rsi, js_http_200
-        mov  rdx, js_http_200_len
         ret
 
     .send_home_image:
         mov  rdi, image_png
-        mov  rsi, png_http_200
-        mov  rdx, png_http_200_len
         ret
 
+_process_file_ext:
+    mov  rdi, HTML_EXT
+    mov  rcx, r10
+    mov  r9,  HTML_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .html
+
+    mov  rdi, CSS_EXT 
+    mov  rcx, r10
+    mov  r9,  CSS_EXT_LEN 
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .css
+
+    mov  rdi, JS_EXT 
+    mov  rcx, r10
+    mov  r9,  JS_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .js
+
+    mov  rdi, PNG_EXT 
+    mov  rcx, r10
+    mov  r9,  PNG_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .png
+
+    .html:
+        mov  r9, html_http_200
+        mov  r8, html_http_200_len
+        ret
+
+    .css:
+        mov  r9, css_http_200
+        mov  r8, css_http_200_len
+        ret
+
+    .js:
+        mov  r9, js_http_200
+        mov  r8, js_http_200_len
+        ret
+
+    .png:
+        mov  r9, png_http_200
+        mov  r8, png_http_200_len
+        ret
