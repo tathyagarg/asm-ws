@@ -19,7 +19,21 @@ quit_err:
 ; rsi: Message (provided by caller)
 ; rdx: Message Length (provided by caller)
 print:
-    mov rax, 1                ; sys_write()
-    mov rdi, 1                ; STDOUT
+    mov  rax, 1                ; sys_write()
+    mov  rdi, 1                ; STDOUT
     syscall
     ret
+
+; ======= Print to STDOUT with Line Feed =======
+; Identical to print, but appends a line feed
+printLF:
+    call print
+    mov  rsi, 0ah             ; Line Feed
+    mov  rdx, 1               ; Length of Line Feed
+    push rsi
+
+    mov  rsi, rsp
+    call print
+    pop  rsi
+    ret
+    

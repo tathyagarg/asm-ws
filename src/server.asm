@@ -6,30 +6,35 @@ section .data
     buf_len     equ     512              ; Request buffer length, 512 bytes
     req_buf     TIMES   buf_len db 0     ; Request buffer
     res_buf     TIMES   buf_len db 0     ; Response buffer
-
     req_len     dq      0                ; Request length
 
-    DEBUG       dq      1
 
     client      dq      0
 
     address     dq      0100007Fh        ; 127.0.0.1 in big endian hex
     port        dw      901Fh            ; 8080 in little endian hex
 
+    path_len    dq      0
+
     startup_msg:
         db      "Server started and listening on http://127.0.0.1:8080", 0ah, 0ah, 0h
     startup_msg_len equ $ - startup_msg
+
+    ; ============= Debug =============
+    %define DEBUG_HEADERS    0
+    %define DEBUG_METHOD     0
+    %define DEBUG_PATH       1
 
     ; ============= Files =============
     html_file_ptr    dq      0
     css_file_ptr     dq      0
 
     index_html:
-        db      "src/templates/home/index.html", 0h
+        db      "templates/home/index.html", 0h
     index_html_len equ $ - index_html
 
     style_css:
-        db      "src/templates/home/style.css",  0h
+        db      "templates/home/style.css",  0h
     style_css_len equ $ - style_css
 
     ; ============= Responses =============
@@ -65,6 +70,10 @@ section .data
     idx_PUT    equ      2
     idx_DELETE equ      3
 
+    ; ============= File System =============
+    HTML_FILE   equ      0
+    CSS_FILE    equ      1
+
 section .bss
     socket_addr resq    1  ; Declare 8 bytes of uninitialized memory
     method      resb    32
@@ -76,6 +85,7 @@ global _start
 %include 'src/functions.asm'
 %include 'src/sockets.asm'
 %include 'src/parser.asm'
+%include 'src/fs.asm'
 
 error_handler:
     cmp  rax, 0
@@ -177,54 +187,61 @@ accept:
     call so_read_socket
     mov  [req_len], rax
 
-    ; Print the request headers, if DEBUG
-    cmp  dword [DEBUG], 0
-    je   parse_headers
+    ; Print the request headers, if DEBUG_HEADERS 
+%if DEBUG_HEADERS
     mov  rsi, req_buf
     mov  rdx, [req_len]
     call print
+%endif
 
 parse_headers:
     mov  rsi, req_buf
     call p_parse_headers
 
-    cmp  dword [DEBUG], 0
-    je   process_request
+    .method:
+        %if DEBUG_METHOD
+            cmp  word [method], idx_GET
+            je   .print_get 
 
-    cmp  word [method], idx_GET
-    je   .print_get 
+            cmp  word [method], idx_POST
+            je   .print_post 
 
-    cmp  word [method], idx_POST
-    je   .print_post 
+            cmp  word [method], idx_PUT
+            je   .print_put
 
-    cmp  word [method], idx_PUT
-    je   .print_put
+            cmp  word [method], idx_DELETE
+            je   .print_delete
 
-    cmp  word [method], idx_DELETE
-    je   .print_delete
+            .print_get:
+                mov  rsi, GET
+                mov  rdx, GET_LEN
+                jmp  ._print 
+            
+            .print_post:
+                mov  rsi, POST
+                mov  rdx, POST_LEN
+                jmp  ._print 
 
-    .print_get:
-        mov  rsi, GET
-        mov  rdx, GET_LEN
-        jmp  ._print 
-    
-    .print_post:
-        mov  rsi, POST
-        mov  rdx, POST_LEN
-        jmp  ._print 
+            .print_put:
+                mov  rsi, PUT
+                mov  rdx, PUT_LEN
+                jmp  ._print 
 
-    .print_put:
-        mov  rsi, PUT
-        mov  rdx, PUT_LEN
-        jmp  ._print 
+            .print_delete:
+                mov  rsi, DELETE
+                mov  rdx, DELETE_LEN
+                jmp  ._print
 
-    .print_delete:
-        mov  rsi, DELETE
-        mov  rdx, DELETE_LEN
-        jmp  ._print
+            ._print:
+                call print
+        %endif
 
-    ._print:
-        call print
+    .path:
+        %if DEBUG_PATH
+            mov  rsi, path
+            mov  rdx, [path_len]
+            call printLF
+        %endif
 
 process_request:
     ; Open the index.html file, read it's contents, store them in html_file_ptr

@@ -8,6 +8,7 @@
 ; Headers are passed in in rsi
 p_parse_headers:
     call p_parse_method
+    call p_parse_path
     ret
 
 
@@ -16,6 +17,8 @@ p_parse_headers:
 ;
 ; Headers are passed in in rsi
 ; Returns the index of the matched method in [method]
+; 
+; Puts the matched method's length in rcx
 p_parse_method:
     push rsi
     mov  rdi, GET
@@ -95,3 +98,59 @@ _match_method:
         mov rax, 0
         ret
     
+; ============== Get Request Path =============
+; Parses the HTTP request headers and stores the path in [path]
+;
+; Headers are passed in in rsi
+p_parse_path:
+    mov  dword [path_len], 0
+    mov  rdi, path
+    .skip_method:
+        mov  al, byte [rsi]
+        cmp  al, ' '
+        je   .found_space
+        inc  rsi
+        jmp  .skip_method
+
+    .found_space:
+        inc  rsi
+
+    .copy_loop:
+        mov  al, byte [rsi]
+        cmp  al, ' '
+        je   .done
+        mov  byte [rdi], al
+        inc  dword [path_len]
+        inc  rsi
+        inc  rdi
+        jmp  .copy_loop
+
+    .done:
+        mov  byte [rdi], 0
+        ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
