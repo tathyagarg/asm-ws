@@ -67,16 +67,24 @@ jle_error_handler:
     jle  _exit
     ret
 
-; TODO: Document
+; ============= Send File =============
+; Sends a file to the client buffer
+; Reads the file contents into res_buf and sends it to the client
+; Loops until the file is completely read
+;
+; Parameters:
+;   rbx: File pointer/descriptor (provided by caller)
 send_file:
+    ; Read the file contents
     mov  rdi, rbx
     mov  rsi, res_buf
     mov  rdx, buf_len
     call so_read_socket
-    cmp  rax, 1
-    jle   finish_send_file
+    cmp  rax, 1                         ; Check if bytes read is < 1
+    jl   finish_send_file
     mov  rcx, rax                       ; Store bytes read to counter
 
+    ; Write the file contents to the client
     mov  rdi, [client]
     mov  rsi, res_buf
     mov  rdx, rcx
@@ -119,38 +127,45 @@ _start:
     call so_set_socket_options
     call error_handler
 
+    ; Bind the socket to the address
     mov  rdi, [socket]
     mov  rsi, [socket_addr]
     call so_bind_socket
     call error_handler
 
+    ; Print the startup message
     mov  rsi, startup_msg
     mov  rdx, startup_msg_len
     call print
 
+    ; Listen for incoming connections
     mov  rdi, [socket]
     mov  rsi, [max_backlog]              ; Set the backlog to 10
     call so_listen
 
 accept:
+    ; Accept incoming connections
     mov  rdi, [socket]                   ; Load the socket file descriptor
     call so_accept_connection
     call jle_error_handler
     mov  [client], rax
 
+    ; Read the request from the client
     mov  rdi, [client]
     mov  rsi, req_buf
     mov  rdx, buf_len 
     call so_read_socket
     mov  [req_len], rax
 
+    ; Print the request headers, if DEBUG
     cmp  dword [DEBUG], 0
     je   process_request
-    mov  rsi, req_buf                  ; Print the request buffer, if DEBUG
+    mov  rsi, req_buf
     mov  rdx, [req_len]
     call print
 
 process_request:
+    ; Open the index.html file, read it's contents, store them in html_file_ptr
     mov  rdi, index_html
     call so_open_file
     cmp  rax, 0
@@ -163,14 +178,17 @@ process_request:
     ; jle  close_client
     ; mov  [css_file_ptr], rax
 
+    ; Reset the counter
     mov  rcx, qword 0
 
 send_headers:
+    ; Write the HTTP 200 OK headers
     mov  rdi, [client]
     mov  rsi, html_http_200
     mov  rdx, html_http_200_len
     call so_write_socket
 
+    ; Send the index.html file
     mov  rbx, [html_file_ptr]
     call send_file
 
@@ -182,6 +200,7 @@ send_headers:
     ; call send_file
 
 close_client:
+    ; Close the client connection
     mov  rdi, [client]
     call so_close_socket
     jmp  accept
