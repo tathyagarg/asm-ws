@@ -129,28 +129,3 @@ p_parse_path:
         mov  byte [rdi], 0
         ret
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

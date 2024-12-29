@@ -26,31 +26,7 @@ section .data
     %define DEBUG_PATH       1
 
     ; ============= Files =============
-    html_file_ptr    dq      0
-    css_file_ptr     dq      0
-
-    index_html:
-        db      "templates/home/index.html", 0h
-    index_html_len equ $ - index_html
-
-    style_css:
-        db      "templates/home/style.css",  0h
-    style_css_len equ $ - style_css
-
-    ; ============= Responses =============
-    html_http_200:
-        db      "HTTP/1.1 200 OK",                 0dh, 0ah
-        db      "Server: Tathya's Awesome Server", 0dh, 0ah
-        db      "Content-Type: text/html",         0dh, 0ah
-        db      0dh, 0ah
-    html_http_200_len equ $ - html_http_200
-
-    css_http_200:
-        db      "HTTP/1.1 200 OK",                 0dh, 0ah
-        db      "Server: Tathya's Awesome Server", 0dh, 0ah
-        db      "Content-Type: text/css",          0dh, 0ah
-        db      0dh, 0ah
-    css_http_200_len equ $ - css_http_200
+    file_ptr    dq      0
 
     ; ============= Methods =============
     GET        db       "GET",    0h
@@ -71,8 +47,8 @@ section .data
     idx_DELETE equ      3
 
     ; ============= File System =============
-    HTML_FILE   equ      0
-    CSS_FILE    equ      1
+    ; HTML_FILE   equ      0
+    ; CSS_FILE    equ      1
 
 section .bss
     socket_addr resq    1  ; Declare 8 bytes of uninitialized memory
@@ -80,12 +56,14 @@ section .bss
     path        resb    256
 
 section .text
+extern process_file
+
 global _start
 
 %include 'src/functions.asm'
 %include 'src/sockets.asm'
 %include 'src/parser.asm'
-%include 'src/fs.asm'
+; %include 'src/fs.asm'
 
 error_handler:
     cmp  rax, 0
@@ -111,7 +89,7 @@ send_file:
     mov  rdx, buf_len
     call so_read_socket
     cmp  rax, 1                         ; Check if bytes read is < 1
-    jl   finish_send_file
+    jl   .finish_send_file
     mov  rcx, rax                       ; Store bytes read to counter
 
     ; Write the file contents to the client
@@ -121,8 +99,8 @@ send_file:
     call so_write_socket
     jmp  send_file
 
-finish_send_file:
-    ret
+    .finish_send_file:
+        ret
 
 _start:
     call so_create_socket
@@ -188,11 +166,11 @@ accept:
     mov  [req_len], rax
 
     ; Print the request headers, if DEBUG_HEADERS 
-%if DEBUG_HEADERS
-    mov  rsi, req_buf
-    mov  rdx, [req_len]
-    call print
-%endif
+    %if DEBUG_HEADERS
+        mov  rsi, req_buf
+        mov  rdx, [req_len]
+        call print
+    %endif
 
 parse_headers:
     mov  rsi, req_buf
@@ -244,39 +222,30 @@ parse_headers:
         %endif
 
 process_request:
-    ; Open the index.html file, read it's contents, store them in html_file_ptr
-    mov  rdi, index_html
+    mov  rsi, path
+    mov  r10, [path_len]
+    call process_file
+    push rsi
+    push rdx
+
+send_headers:
     call so_open_file
     cmp  rax, 0
-    jle  close_client
-    mov  [html_file_ptr], rax
-
-    ; mov  rdi, style_css
-    ; call so_open_file
-    ; cmp  rax, 0
-    ; jle  close_client
-    ; mov  [css_file_ptr], rax
+    jle  close_client                           ; Error
 
     ; Reset the counter
     mov  rcx, qword 0
+    mov  [file_ptr], rax
 
-send_headers:
     ; Write the HTTP 200 OK headers
     mov  rdi, [client]
-    mov  rsi, html_http_200
-    mov  rdx, html_http_200_len
+    pop  rdx
+    pop  rsi
     call so_write_socket
 
-    ; Send the index.html file
-    mov  rbx, [html_file_ptr]
+    ; Send the file
+    mov  rbx, [file_ptr]
     call send_file
-
-    ; mov  rdi, [client]
-    ; mov  rsi, css_http_200
-    ; mov  rdx, css_http_200_len
-    ; call so_write_socket
-    ; mov  rbx, [css_file_ptr]
-    ; call send_file
 
 close_client:
     ; Close the client connection
