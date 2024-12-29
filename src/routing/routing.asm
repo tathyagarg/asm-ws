@@ -44,16 +44,19 @@ section .data
     fl_not_found db "templates/not_found.html",         0h
 
     ep_     db "/", 0h
-    fl_home_index_html     db "templates/home/index.html", 0h
+    fl_ep_     db "templates/home/index.html", 0h
+
+    ep_index_html     db "/index.html", 0h
+    fl_ep_index_html     db "templates/home/index.html", 0h
 
     ep_style_css     db "/style.css", 0h
-    fl_home_style_css     db "templates/home/style.css", 0h
+    fl_ep_style_css     db "templates/home/style.css", 0h
 
     ep_script_js     db "/script.js", 0h
-    fl_home_script_js     db "templates/home/script.js", 0h
+    fl_ep_script_js     db "templates/home/script.js", 0h
 
     ep_image_png     db "/image.png", 0h
-    fl_home_image_png     db "templates/home/image.png", 0h
+    fl_ep_image_png     db "templates/home/image.png", 0h
 
 section .text
 global process_file
@@ -77,8 +80,17 @@ process_file:
         mov  rcx, r10
         call f_match_path
         cmp  rax, 1
+        jne  .ep_index_html
+        mov  rdi, fl_ep_
+        ret
+
+    .ep_index_html:
+        mov  rdi, ep_index_html
+        mov  rcx, r10
+        call f_match_path
+        cmp  rax, 1
         jne  .ep_style_css
-        mov  rdi, fl_home_index_html
+        mov  rdi, fl_ep_index_html
         ret
 
     .ep_style_css:
@@ -87,7 +99,7 @@ process_file:
         call f_match_path
         cmp  rax, 1
         jne  .ep_script_js
-        mov  rdi, fl_home_style_css
+        mov  rdi, fl_ep_style_css
         ret
 
     .ep_script_js:
@@ -96,7 +108,7 @@ process_file:
         call f_match_path
         cmp  rax, 1
         jne  .ep_image_png
-        mov  rdi, fl_home_script_js
+        mov  rdi, fl_ep_script_js
         ret
 
     .ep_image_png:
@@ -105,7 +117,7 @@ process_file:
         call f_match_path
         cmp  rax, 1
         jne  .not_found
-        mov  rdi, fl_home_image_png
+        mov  rdi, fl_ep_image_png
         ret
 
     .not_found:

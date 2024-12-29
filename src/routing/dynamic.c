@@ -84,9 +84,9 @@ void write_data(FILE *wfile, FILE* rfile) {
     while (!feof(rfile)) {
         fscanf(rfile, "%s %s\n", ep, file_location);
 
-        char curr_ep_normalized[MAXSIZE] = {0};
-        curr_ep_normalized[0] = 'e';
-        curr_ep_normalized[1] = 'p';
+        char ep_normalized[MAXSIZE] = {0};
+        ep_normalized[0] = 'e';
+        ep_normalized[1] = 'p';
 
         fprintf(wfile, "    ep");
         // Write the endpoint
@@ -95,7 +95,7 @@ void write_data(FILE *wfile, FILE* rfile) {
                 break;
             }
             char curr = ep[i] == '/' || ep[i] == '.' ? '_' : ep[i];
-            curr_ep_normalized[i + 2] = curr;
+            ep_normalized[i + 2] = curr;
 
             fprintf(wfile, "%c", curr);
         }
@@ -106,21 +106,22 @@ void write_data(FILE *wfile, FILE* rfile) {
         curr_file_location[0] = 'f';
         curr_file_location[1] = 'l';
         curr_file_location[2] = '_';
+        strcpy(curr_file_location + 3, ep_normalized);
 
-        fprintf(wfile, "    fl_");
+        fprintf(wfile, "    %s", curr_file_location);
         // Write the file location
-        for (long unsigned int i = 0; i < sizeof(file_location) / sizeof(char); i++) {
-            if (file_location[i] == '\0') {
-                break;
-            }
-            char curr = file_location[i] == '/' || file_location[i] == '.' ? '_' : file_location[i];
-            curr_file_location[i + 3] = curr;
+        // for (long unsigned int i = 0; i < sizeof(file_location) / sizeof(char); i++) {
+        //     if (file_location[i] == '\0') {
+        //         break;
+        //     }
+        //     // char curr = file_location[i] == '/' || file_location[i] == '.' ? '_' : file_location[i];
+        //     curr_file_location[i + 3] = curr;
 
-            fprintf(wfile, "%c", curr);
-        }
+        //     fprintf(wfile, "%c", curr);
+        // }
         fprintf(wfile, "     db \"%s/%s\", 0h\n\n", ROOT_FOLDER, file_location);
 
-        strcpy(eps[line], curr_ep_normalized);
+        strcpy(eps[line], ep_normalized);
         strcpy(file_locations[line], curr_file_location);
 
         line++;
