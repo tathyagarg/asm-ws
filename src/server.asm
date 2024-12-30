@@ -20,8 +20,8 @@ section .data
     startup_msg_len equ $ - startup_msg
 
     ; ============= Debug =============
-    %define DEBUG_HEADERS    0
-    %define DEBUG_METHOD     0
+    %define DEBUG_HEADERS    1
+    %define DEBUG_METHOD     1
     %define DEBUG_PATH       1
 
     ; ============= Files =============
@@ -254,7 +254,7 @@ parse_headers:
                 jmp  ._print
 
             ._print:
-                call print
+                call printLF
         %endif
 
     .path:
@@ -285,6 +285,7 @@ send_headers:
     pop  rdx
     pop  rsi
     call so_write_socket
+    call printLF
 
     ; Send the file
     mov  rbx, [file_ptr]
