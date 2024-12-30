@@ -87,6 +87,13 @@ f_process_file_ext:
     cmp  rax, 1
     je   .png
 
+    mov  rdi, ICO_EXT 
+    mov  rcx, r10
+    mov  r9,  ICO_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .ico
+
     .html:
         mov  r9, html_http_200
         mov  r8, html_http_200_len
@@ -105,4 +112,9 @@ f_process_file_ext:
     .png:
         mov  r9, png_http_200
         mov  r8, png_http_200_len
+        ret
+
+    .ico:
+        mov  r9, ico_http_200
+        mov  r8, ico_http_200_len
         ret

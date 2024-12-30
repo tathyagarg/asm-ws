@@ -12,6 +12,9 @@ section .data
     PNG_EXT      db      "gnp",  0h
     PNG_EXT_LEN  equ     $ - PNG_EXT
 
+    ICO_EXT      db      "oci",  0h
+    ICO_EXT_LEN  equ     $ - ICO_EXT
+
     ; ============= Responses ============
     html_http_200:
         db      "HTTP/1.1 200 OK",                      0dh, 0ah
@@ -41,6 +44,13 @@ section .data
         db                                              0dh, 0ah
     png_http_200_len equ $ - png_http_200
 
+    ico_http_200:
+        db      "HTTP/1.1 200 OK",                      0dh, 0ah
+        db      "Server: Tathya's Awesome Server",      0dh, 0ah
+        db      "Content-Type: image/x-icon",           0dh, 0ah
+        db                                              0dh, 0ah
+    ico_http_200_len equ $ - ico_http_200
+
     not_found_http_404:
         db      "HTTP/1.1 404 Not Found",               0dh, 0ah
         db      "Server: Tathya's Awesome Server",      0dh, 0ah
@@ -50,22 +60,22 @@ section .data
     fl_not_found db "templates/not_found.html",         0h
 
     ep_     db "/", 0h
-    fl_ep_     db "templates/home/index.html", 0h
+    fl_ep_     db "templates/index.html", 0h
+
+    ep_index_html     db "/index.html", 0h
+    fl_ep_index_html     db "templates/index.html", 0h
 
     ep_404     db "/404", 0h
     fl_ep_404     db "templates/not_found.html", 0h
 
-    ep_index_html     db "/index.html", 0h
-    fl_ep_index_html     db "templates/home/index.html", 0h
+    ep_about     db "/about", 0h
+    fl_ep_about     db "templates/about.html", 0h
+
+    ep_favicon_ico     db "/favicon.ico", 0h
+    fl_ep_favicon_ico     db "templates/favicon.ico", 0h
 
     ep_style_css     db "/style.css", 0h
-    fl_ep_style_css     db "templates/home/style.css", 0h
-
-    ep_script_js     db "/script.js", 0h
-    fl_ep_script_js     db "templates/home/script.js", 0h
-
-    ep_image_png     db "/image.png", 0h
-    fl_ep_image_png     db "templates/home/image.png", 0h
+    fl_ep_style_css     db "templates/style.css", 0h
 
 section .text
 global process_file
@@ -89,17 +99,8 @@ process_file:
         mov  rcx, r10
         call f_match_path
         cmp  rax, 1
-        jne  .ep_404
-        mov  rdi, fl_ep_
-        ret
-
-    .ep_404:
-        mov  rdi, ep_404
-        mov  rcx, r10
-        call f_match_path
-        cmp  rax, 1
         jne  .ep_index_html
-        mov  rdi, fl_ep_404
+        mov  rdi, fl_ep_
         ret
 
     .ep_index_html:
@@ -107,8 +108,35 @@ process_file:
         mov  rcx, r10
         call f_match_path
         cmp  rax, 1
-        jne  .ep_style_css
+        jne  .ep_404
         mov  rdi, fl_ep_index_html
+        ret
+
+    .ep_404:
+        mov  rdi, ep_404
+        mov  rcx, r10
+        call f_match_path
+        cmp  rax, 1
+        jne  .ep_about
+        mov  rdi, fl_ep_404
+        ret
+
+    .ep_about:
+        mov  rdi, ep_about
+        mov  rcx, r10
+        call f_match_path
+        cmp  rax, 1
+        jne  .ep_favicon_ico
+        mov  rdi, fl_ep_about
+        ret
+
+    .ep_favicon_ico:
+        mov  rdi, ep_favicon_ico
+        mov  rcx, r10
+        call f_match_path
+        cmp  rax, 1
+        jne  .ep_style_css
+        mov  rdi, fl_ep_favicon_ico
         ret
 
     .ep_style_css:
@@ -116,26 +144,8 @@ process_file:
         mov  rcx, r10
         call f_match_path
         cmp  rax, 1
-        jne  .ep_script_js
-        mov  rdi, fl_ep_style_css
-        ret
-
-    .ep_script_js:
-        mov  rdi, ep_script_js
-        mov  rcx, r10
-        call f_match_path
-        cmp  rax, 1
-        jne  .ep_image_png
-        mov  rdi, fl_ep_script_js
-        ret
-
-    .ep_image_png:
-        mov  rdi, ep_image_png
-        mov  rcx, r10
-        call f_match_path
-        cmp  rax, 1
         jne  .not_found
-        mov  rdi, fl_ep_image_png
+        mov  rdi, fl_ep_style_css
         ret
 
     .not_found:

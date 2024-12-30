@@ -20,9 +20,10 @@ section .data
     startup_msg_len equ $ - startup_msg
 
     ; ============= Debug =============
-    %define DEBUG_HEADERS    1
-    %define DEBUG_METHOD     1
-    %define DEBUG_PATH       1
+    %define DEBUG_HEADERS    0
+    %define DEBUG_METHOD     0
+    %define DEBUG_PATH       0
+    %define DEBUG_RESP       0
 
     ; ============= Files =============
     file_ptr    dq      0
@@ -115,6 +116,9 @@ make_int:
     .divide_loop:
         ; Get 1 character from number
         mov  bl, byte [rsi]
+        cmp  bl, 0
+        je   .done
+
         sub  bl, 30h
 
         ; rax = rax * 10 + bl
@@ -125,7 +129,8 @@ make_int:
         cmp  rcx, 0
         jg   .divide_loop
 
-    ret
+    .done:
+        ret
 
 _start:
     cmp word [rsp], 1
@@ -285,7 +290,10 @@ send_headers:
     pop  rdx
     pop  rsi
     call so_write_socket
-    call printLF
+
+    %if DEBUG_RESP
+        call printLF
+    %endif
 
     ; Send the file
     mov  rbx, [file_ptr]

@@ -17,6 +17,9 @@
   "    PNG_EXT      db      \"gnp\",  0h\n"                                    \
   "    PNG_EXT_LEN  equ     $ - PNG_EXT\n"                                     \
   "\n"                                                                         \
+  "    ICO_EXT      db      \"oci\",  0h\n"                                    \
+  "    ICO_EXT_LEN  equ     $ - ICO_EXT\n"                                     \
+  "\n"                                                                         \
   "    ; ============= Responses ============\n"                               \
   "    html_http_200:\n"                                                       \
   "        db      \"HTTP/1.1 200 OK\",                      0dh, 0ah\n"       \
@@ -46,10 +49,17 @@
   "        db                                              0dh, 0ah\n"         \
   "    png_http_200_len equ $ - png_http_200\n"                                \
   "\n"                                                                         \
+  "    ico_http_200:\n"                                                        \
+  "        db      \"HTTP/1.1 200 OK\",                      0dh, 0ah\n"       \
+  "        db      \"Server: Tathya's Awesome Server\",      0dh, 0ah\n"       \
+  "        db      \"Content-Type: image/x-icon\",           0dh, 0ah\n"       \
+  "        db                                              0dh, 0ah\n"         \
+  "    ico_http_200_len equ $ - ico_http_200\n"                                \
+  "\n"                                                                         \
   "    not_found_http_404:\n"                                                  \
-  "        db      \"HTTP/1.1 404 Not Found\",               0dh, 0ah\n"         \
-  "        db      \"Server: Tathya's Awesome Server\",      0dh, 0ah\n"         \
-  "        db      \"Content-Type: text/html\",              0dh, 0ah\n"         \
+  "        db      \"HTTP/1.1 404 Not Found\",               0dh, 0ah\n"       \
+  "        db      \"Server: Tathya's Awesome Server\",      0dh, 0ah\n"       \
+  "        db      \"Content-Type: text/html\",              0dh, 0ah\n"       \
   "        db                                              0dh, 0ah\n"         \
   "    not_found_http_404_len equ $ - not_found_http_404\n"                    \
   "    fl_not_found db \"templates/not_found.html\",         0h\n\n"           \
@@ -83,12 +93,19 @@ void write_data(FILE *wfile, FILE* rfile) {
     char ep[MAXSIZE] = {0};
     char file_location[MAXSIZE] = {0};
 
+    char line_content[MAXSIZE] = {0};
+
     char eps[MAXSIZE][MAXSIZE] = {0};
     char file_locations[MAXSIZE][MAXSIZE] = {0};
 
     int line = 0;
     while (!feof(rfile)) {
-        fscanf(rfile, "%s %s\n", ep, file_location);
+        fgets(line_content, MAXSIZE, rfile);
+        if (line_content[0] == '\n') {
+            break;
+        }
+
+        sscanf(line_content, "%s %s", ep, file_location);
 
         char ep_normalized[MAXSIZE] = {0};
         ep_normalized[0] = 'e';
@@ -152,7 +169,7 @@ int main() {
         exit(1);
     }
 
-    FILE* rfile = fopen("src/routing/.endpoints", "r");
+    FILE* rfile = fopen("templates/.endpoints", "r");
     if (rfile == NULL) {
         printf("Error opening read file!\n");
         exit(1);

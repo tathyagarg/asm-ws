@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <title>Assembly Webserver</title>
+</head>
+
+<body>
+  <nav>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+    </ul>
+  </nav>
+  <main>
+    <h1 id="title">ASM-WS</h1>
+    <div id="cta-wrapper">
+      <h2 id="desc">Blazing-fast performance. Built from scratch.</h2>
+      <div id="cta">
+        <a href='/about' id="cta-link">
+          <button>
+            Learn More
+          </button>
+        </a>
+        <a href='https://github.com/tathyagarg/webserver' id="cta-link">
+          <button>
+            GitHub
+          </button>
+        </a>
+      </div>
+    </div>
+    <div>
+      <h1>Features</h1>
+      <div id="features">
+        <div class="feature">
+          <img src="https://img.icons8.com/ios/500/24273a/rocket.png" />
+          <h2>Blazing-fast</h2>
+          <p>ASM-WS is built from scratch in Assembly, making it blazingly fast.</p>
+        </div>
+        <div class="feature">
+          <img src="https://img.icons8.com/ios/500/24273a/lock.png" />
+          <h2>Secure</h2>
+          <p>ASM-WS is built with security in mind, ensuring that your data is safe and secure.</p>
+        </div>
+        <div class="feature">
+          <img src="https://img.icons8.com/ios/500/24273a/earth-planet.png" />
+          <h2>Scalable</h2>
+          <p>ASM-WS is designed to be scalable, allowing you to handle millions of requests per second.</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h1>Requirements</h1>
+      <!--NASM, GCC, Make -->
+      <div id="requirements">
+        <div class="requirement">
+          <h2>NASM</h2>
+        </div>
+        <div class="requirement">
+          <h2>GCC</h2>
+        </div>
+        <div class="requirement">
+          <h2>Make</h2>
+        </div>
+      </div>
+      <div>
+        <h1>Demo</h1>
+        <div id="demo">
+          <div class="this-abt">
+            <h2>Run this Website</h2>
+            <p>Run this website on your local machine (on the default port <code>57309</code>) using the following
+              commands</p>
+          </div>
+          <div class="this-cmd">
+            <code>
+              $ git clone https://github.com/tathyagarg/webserver.git
+              $ cd webserver
+              $ make</code>
+          </div>
+
+          <div class="this-abt">
+            <h2>Run your own Website</h2>
+            <p>Run your own website (must be written in vanilla HTML/CSS/JS, unfortunately) by simply putting it in the
+              <code>templates</code> folder, and updating the <code>templates/.endpoints</code> file <a
+                href='https://example.com'>(See More)</a>.
+              These commands show how to run a website with a single <code>index.html</code> file.
+            </p>
+          </div>
+          <div class="this-cmd">
+            <code>
+              $ git clone https://github.com/tathyagarg/webserver.git
+              $ cd webserver
+              $ mv your-website templates
+              $ echo "/ index.html" > templates/.endpoints
+              $ make</code>
+          </div>
+
+          <div class="this-abt">
+            <h2>Change your port</h2>
+            <p>To change the port your server runs on, change the contents of the <code>PORT</code> file:</p>
+          </div>
+          <div class="this-cmd">
+            <code>
+              $ cd webserver
+              $ echo "8080" > PORT
+              $ make</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <p>&copy; 2021 ASM-WS. All rights reserved.</p>
+  </footer>
+</body>
+
+</html>

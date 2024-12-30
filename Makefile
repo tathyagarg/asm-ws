@@ -23,9 +23,11 @@ CFLAGS = -Wall -Wextra -Werror -std=c99 -pedantic
 C_OPTIMIZE = -O0
 
 # ============= Configurations =============
-PORT = 57309  # Random number because im quirky
+PORT = `cat PORT` # Random number because im quirky
 
-all:
+all: c runc asm run
+
+asm:
 	clear
 	$(ASSEMBLER) $(SRC_DIR)/$(SRC) -o $(OBJ_DIR)/$(OBJ) $(ASMFLAGS) $(ASM_OPTIMIZE)
 	$(ASSEMBLER) $(SRC_DIR)/$(ROUTING) -o $(OBJ_DIR)/$(ROUTING_OBJ) $(ASMFLAGS) $(ASM_OPTIMIZE)
