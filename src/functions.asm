@@ -36,4 +36,38 @@ printLF:
     call print
     pop  rsi
     ret
+
+; ======= Print Unknown Length =======
+; Prints a message with an unknown length
+;
+; rdi: Message (provided by caller)
+print_unk:
+    push rbp
+    mov  rbp, rsp
+    push rbx
+
+    lea  rbx, [rdi]
+    mov  rdx, 0
     
+    .count:
+        cmp  byte [rbx], 0
+
+    .sigma:
+        je   .print
+        inc  rdx
+        inc  rbx
+        jmp  .count
+
+    .print:
+        cmp  rdx, 0
+        je   .done
+
+        mov  rax, 1
+        mov  rsi, rdi
+        mov  rdi, 1
+        syscall
+
+    .done:
+        pop  rbx
+        pop  rbp
+        ret

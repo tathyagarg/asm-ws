@@ -22,6 +22,9 @@ C_BIN = dynamic
 CFLAGS = -Wall -Wextra -Werror -std=c99 -pedantic
 C_OPTIMIZE = -O0
 
+# ============= Configurations =============
+PORT = 57309  # Random number because im quirky
+
 all:
 	clear
 	$(ASSEMBLER) $(SRC_DIR)/$(SRC) -o $(OBJ_DIR)/$(OBJ) $(ASMFLAGS) $(ASM_OPTIMIZE)
@@ -29,7 +32,7 @@ all:
 	$(LINKER) $(OBJ_DIR)/$(ROUTING_OBJ) $(OBJ_DIR)/$(OBJ) -o $(BIN_DIR)/$(BIN)
 
 run:
-	./$(BIN_DIR)/$(BIN)
+	./$(BIN_DIR)/$(BIN) $(PORT)
 
 clean:
 	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/$(BIN)

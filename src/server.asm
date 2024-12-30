@@ -12,12 +12,11 @@ section .data
     client      dq      0
 
     address     dq      0100007Fh        ; 127.0.0.1 in big endian hex
-    port        dw      901Fh            ; 8080 in little endian hex
 
     path_len    dq      0
 
     startup_msg:
-        db      "Server started and listening on http://127.0.0.1:8080", 0ah, 0ah, 0h
+        db      "Server started and listening on http://127.0.0.1:", 0h
     startup_msg_len equ $ - startup_msg
 
     ; ============= Debug =============
@@ -54,6 +53,8 @@ section .bss
     socket_addr resq    1  ; Declare 8 bytes of uninitialized memory
     method      resb    32
     path        resb    256
+
+    port        resw    1
 
 section .text
 extern process_file
@@ -102,7 +103,45 @@ send_file:
     .finish_send_file:
         ret
 
+; ============= Make Int =============
+; Converts a string to an integer
+;
+; Parameters:
+;   rsi: String to convert
+;   rcx: Length of the string
+make_int:
+    mov rax, 0
+
+    .divide_loop:
+        ; Get 1 character from number
+        mov  bl, byte [rsi]
+        sub  bl, 30h
+
+        ; rax = rax * 10 + bl
+        imul rax, rax, 10
+        add  rax, rbx
+        inc  rsi
+        dec  rcx
+        cmp  rcx, 0
+        jg   .divide_loop
+
+    ret
+
 _start:
+    cmp word [rsp], 1
+    je   _exit
+
+    mov  r12, [rsp + 16]  ; Safekeeping the port number
+
+    mov  rsi, [rsp + 16]
+    mov  rcx, 5
+    call make_int
+
+    ; Endianness swap
+    bswap eax
+    shr   eax, 16
+    mov  [port], rax
+
     call so_create_socket
     mov  [socket], rax                 ; Store socket file descriptor
 
@@ -145,6 +184,10 @@ _start:
     mov  rsi, startup_msg
     mov  rdx, startup_msg_len
     call print
+
+    mov  rsi, r12
+    mov  rdx, 5
+    call printLF
 
     ; Listen for incoming connections
     mov  rdi, [socket]
