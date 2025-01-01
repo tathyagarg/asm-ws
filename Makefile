@@ -19,10 +19,17 @@ ASM_OPTIMIZE = -O0
 PYTHON = python3.13
 PYTHON_FILE = src/routing/dynamic.py
 
+RESPONSES_DIR = templates/post_responses
+
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-value -Wno-unused-label -Wno-unused-result -Wno-unused-local-typedefs
+COPT = -O3
+POST_BIN = templates/post_responses/bin
+
 # ============= Configurations =============
 PORT = `cat PORT` # Random number because im quirky
 
-all: dyn asm run
+all: dyn responses asm run
 
 asm:
 	$(ASSEMBLER) $(SRC_DIR)/$(SRC) -o $(OBJ_DIR)/$(OBJ) $(ASMFLAGS) $(ASM_OPTIMIZE)
@@ -37,3 +44,9 @@ clean:
 
 dyn:
 	$(PYTHON) $(PYTHON_FILE)
+
+responses:
+	for src_file in "$(RESPONSES_DIR)"/*.c; do\
+		$(CC) $(CFLAGS) $(COPT) -c $$src_file -o $(POST_BIN)/$$(basename $$src_file .c).o;\
+	done
+

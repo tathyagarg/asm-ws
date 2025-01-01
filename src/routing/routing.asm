@@ -1,5 +1,5 @@
 section .data
-    NULL equ 0
+    NULL          equ 0
 
     ; ============================== File Extensions ==============================
     HTML_EXT      db "lmth", 0
@@ -49,40 +49,44 @@ section .data
     ICO_MIME         db "image/x-icon"
     ICO_MIME_LEN     equ $ - ICO_MIME
 
-    ; ============================== File Locations ==============================
-    fl_not_found db "templates/not_found.html", 0
-    
-    ep_ db "/", 0
-    fl_ep_ db "templates/index.html", 0
-
-    ep_index_html db "/index.html", 0
-    fl_ep_index_html db "templates/index.html", 0
-
-    ep_404 db "/404", 0
-    fl_ep_404 db "templates/not_found.html", 0
-
-    ep_about db "/about", 0
-    fl_ep_about db "templates/about.html", 0
-
-    ep_favicon_ico db "/favicon.ico", 0
-    fl_ep_favicon_ico db "templates/favicon.ico", 0
-
-    ep_style_css db "/style.css", 0
-    fl_ep_style_css db "templates/style.css", 0
-
-    ep_bye db "/bye", 0
-    fl_ep_bye db "templates/post_responses/bin/hello", 0
-    arg_ep_bye dq fl_ep_bye, 0
-    
-    ; ============================== Responses ==============================
-    FILE equ 0
-    EXEC equ 1
+    ; ============================== Response Types ==============================
+    RESPONSE_FILE  equ 0
+    RESPONSE_EXEC  equ 1
 
     ; ============================== Methods ==============================
     GET    equ 0
     POST   equ 1
     PUT    equ 2
     DELETE equ 3
+
+    ; ============================== File Locations ==============================
+    get_fl_not_found db "templates/not_found.html", 0
+    
+    get_ep_ db "/", 0
+    get_fl_ep_ db "templates/index.html", 0
+
+    get_ep_index_html db "/index.html", 0
+    get_fl_ep_index_html db "templates/index.html", 0
+
+    get_ep_404 db "/404", 0
+    get_fl_ep_404 db "templates/not_found.html", 0
+
+    get_ep_about db "/about", 0
+    get_fl_ep_about db "templates/about.html", 0
+
+    get_ep_favicon_ico db "/favicon.ico", 0
+    get_fl_ep_favicon_ico db "templates/favicon.ico", 0
+
+    get_ep_style_css db "/style.css", 0
+    get_fl_ep_style_css db "templates/style.css", 0
+
+    post_ep_hello db "/hello", 0
+    post_fl_ep_hello db "templates/post_responses/bin/hello", 0
+    arg_ep_hello dq post_fl_ep_hello, 0
+
+    post_ep_bye db "/bye", 0
+    post_fl_ep_bye db "templates/post_responses/bye.sh", 0
+    arg_ep_bye dq post_fl_ep_bye, 0
 
 
 section .bss
@@ -102,89 +106,102 @@ global process_file
 ;   r10 holds the length of the path
 ;   rsi holds the path
 process_file:
-    .comparison:
-        cmp  r9, GET
-        je   .get
+    cmp  r9, GET
+    je   .get
 
-        cmp  r9, POST
-        je   .post
+    cmp  r9, POST
+    je   .post
 
     .get:
+
         push rsi
         call f_process_file_ext
         pop  rsi
-        mov  r11, FILE
-
+        mov  r11, RESPONSE_FILE
+    
         .ep_:
-            mov  rdi, ep_
+            mov  rdi, get_ep_ 
             mov  rcx, r10
             call f_match_path
             cmp  rax, 1
             jne  .ep_index_html
-            mov  rdi, fl_ep_
+            mov  rdi, get_fl_ep_ 
             ret
-
+    
         .ep_index_html:
-            mov  rdi, ep_index_html
+            mov  rdi, get_ep_index_html 
             mov  rcx, r10
             call f_match_path
             cmp  rax, 1
             jne  .ep_404
-            mov  rdi, fl_ep_index_html
+            mov  rdi, get_fl_ep_index_html 
             ret
-
+    
         .ep_404:
-            mov  rdi, ep_404
+            mov  rdi, get_ep_404 
             mov  rcx, r10
             call f_match_path
             cmp  rax, 1
             jne  .ep_about
-            mov  rdi, fl_ep_404
+            mov  rdi, get_fl_ep_404 
             ret
-
+    
         .ep_about:
-            mov  rdi, ep_about
+            mov  rdi, get_ep_about 
             mov  rcx, r10
             call f_match_path
             cmp  rax, 1
             jne  .ep_favicon_ico
-            mov  rdi, fl_ep_about
+            mov  rdi, get_fl_ep_about 
             ret
-
+    
         .ep_favicon_ico:
-            mov  rdi, ep_favicon_ico
+            mov  rdi, get_ep_favicon_ico 
             mov  rcx, r10
             call f_match_path
             cmp  rax, 1
             jne  .ep_style_css
-            mov  rdi, fl_ep_favicon_ico
+            mov  rdi, get_fl_ep_favicon_ico 
             ret
-
+    
         .ep_style_css:
-            mov  rdi, ep_style_css
+            mov  rdi, get_ep_style_css 
             mov  rcx, r10
             call f_match_path
             cmp  rax, 1
             jne  .not_found
-            mov  rdi, fl_ep_style_css
+            mov  rdi, get_fl_ep_style_css 
             ret
-
+    
     .post:
-        mov  r11, EXEC
+
+        mov  r11, RESPONSE_EXEC
+    
+        .ep_hello:
+            mov  rdi, post_ep_hello
+            mov  rcx, r10
+            call f_match_path
+            cmp  rax, 1
+            jne  .ep_bye
+            lea  rdi, [post_fl_ep_hello]
+            lea  rsi, [arg_ep_hello]
+            lea  rdx, [NULL]
+            ret
+    
         .ep_bye:
-            mov  rdi, ep_bye
+            mov  rdi, post_ep_bye
             mov  rcx, r10
             call f_match_path
             cmp  rax, 1
             jne  .not_found
-            lea  rdi, [fl_ep_bye]
+            lea  rdi, [post_fl_ep_bye]
             lea  rsi, [arg_ep_bye]
             lea  rdx, [NULL]
             ret
-
+    
     .not_found:
-        mov  rdi, fl_not_found
+        mov  rdi, get_fl_not_found
         mov  r9, HTTP_404
         mov  r8, HTTP_404_LEN
-        mov  r11, FILE
+        mov  r11, RESPONSE_FILE
         ret

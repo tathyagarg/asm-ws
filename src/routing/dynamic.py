@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum
 
@@ -122,21 +123,21 @@ HEADERS = {
 
 EP_FORMATS = {
     "get": """
-            mov  rdi, {ep} 
+            mov  rdi, get_{ep} 
             mov  rcx, r10
             call f_match_path
             cmp  rax, 1
             jne  .{next_ep}
-            mov  rdi, {fl} 
+            mov  rdi, get_{fl} 
             ret
     """,
     "post": """
-            mov  rdi, {ep}
+            mov  rdi, post_{ep}
             mov  rcx, r10
             call f_match_path
             cmp  rax, 1
             jne  .{next_ep}
-            lea  rdi, [{fl}]
+            lea  rdi, [post_{fl}]
             lea  rsi, [arg_{ep}]
             lea  rdx, [NULL]
             ret
@@ -144,8 +145,8 @@ EP_FORMATS = {
 }
 
 METHOD_PREFIXES = {
-    "get": "templates/",
-    "post": "templates/post_responses/",
+    "get": "templates",
+    "post": "templates/post_responses",
 }
 
 
@@ -160,7 +161,7 @@ def parser(rfile):
     with open(rfile, "r") as f:
         lines = f.readlines()
 
-    routes: dict[str, list[Route]] = {}
+    routes: dict[str, list[Route]] = defaultdict(list)
     curr_method: Method | None = None
     with open(WFILE, "w") as f:
         f.write(DATA)
@@ -171,6 +172,9 @@ def parser(rfile):
                 curr_method = Method[m.group(0)]
                 continue
 
+            if not line:
+                continue
+
             ep, file_location = line.split(" ")
 
             ep_normalized = "ep" + ep.replace("/", "_").replace(".", "_")
@@ -178,36 +182,42 @@ def parser(rfile):
 
             f.write(f'    {curr_method!s}_{ep_normalized} db "{ep}", 0\n')
             f.write(
-                f'    {curr_method!s}_{fl_normalized} db "{METHOD_PREFIXES[str(curr_method)]}/{file_location}", 0\n\n'
+                f'    {curr_method!s}_{fl_normalized} db "{METHOD_PREFIXES[str(curr_method)]}/{file_location}", 0\n'
             )
             if curr_method == Method.POST:
                 f.write(
-                    f"    arg_{ep_normalized} db {curr_method!s}_{fl_normalized}, 0\n"
+                    f"    arg_{ep_normalized} dq {curr_method!s}_{fl_normalized}, 0\n\n"
                 )
+            else:
+                f.write("\n")
 
             if not curr_method:
                 raise ValueError("No method found")
-            routes[str(curr_method)].append(Route(curr_method, ep, file_location))
+            routes[str(curr_method)].append(
+                Route(curr_method, ep_normalized, fl_normalized)
+            )
 
         f.write(TEXT)
         for method, curr_routes in routes.items():
             f.write(f"    .{method}:\n")
             f.write(HEADERS[method])
+            f.write("\n")
             for i, route in enumerate(curr_routes):
                 ep, fl = route.ep, route.file_location
                 next_ep = (
                     curr_routes[i + 1].ep if i + 1 < len(curr_routes) else "not_found"
                 )
 
-                f.write(f"    .{ep}:\n")
+                f.write(f"        .{ep}:")
                 f.write(EP_FORMATS[method].format(ep=ep, fl=fl, next_ep=next_ep))
+                f.write("\n")
 
-            f.write(f"    .not_found:\n")
-            f.write(f"        mov  rdi, fl_not_found\n")
-            f.write(f"        mov  r9, HTTP_404\n")
-            f.write(f"        mov  r8, HTTP_404_LEN\n")
-            f.write(f"        mov  r11, RESPONSE_FILE\n")
-            f.write(f"        ret\n")
+        f.write(f"    .not_found:\n")
+        f.write(f"        mov  rdi, get_fl_not_found\n")
+        f.write(f"        mov  r9, HTTP_404\n")
+        f.write(f"        mov  r8, HTTP_404_LEN\n")
+        f.write(f"        mov  r11, RESPONSE_FILE\n")
+        f.write(f"        ret\n")
 
 
 parser(RFILE)
