@@ -150,7 +150,7 @@ f_process_file_ext:
         mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 1], 0ah
         mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 2], 0dh
         mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 3], 0ah
-        mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 4], 0h
+
 
         mov  r9, rax
         add  r8, HTTP_200_LEN

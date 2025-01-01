@@ -25,31 +25,29 @@ DATA = """section .data
     HTTP_200:
         db "HTTP/1.1 200 OK",                          0dh, 0ah
         db "Server: Tathya's Awesome Assembly Server", 0dh, 0ah
-        db                                             0h
     HTTP_200_LEN equ $ - HTTP_200
 
     HTTP_404:
         db "HTTP/1.1 404 Not Found",                   0dh, 0ah
         db "Server: Tathya's Awesome Assembly Server", 0dh, 0ah
-        db                                             0h
     HTTP_404_LEN equ $ - HTTP_404
 
-    Content_Type db "Content-Type: ", 0
+    Content_Type db "Content-Type: "
     Content_Type_LEN equ $ - Content_Type
 
-    HTML_MIME db "text/html", 0
+    HTML_MIME db "text/html"
     HTML_MIME_LEN equ $ - HTML_MIME
 
-    CSS_MIME db "text/css", 0
+    CSS_MIME db "text/css"
     CSS_MIME_LEN equ $ - CSS_MIME
 
-    JS_MIME db "application/javascript", 0
+    JS_MIME db "application/javascript"
     JS_MIME_LEN equ $ - JS_MIME
 
-    PNG_MIME db "image/png", 0
+    PNG_MIME db "image/png"
     PNG_MIME_LEN equ $ - PNG_MIME
 
-    ICO_MIME db "image/x-icon", 0
+    ICO_MIME db "image/x-icon"
     ICO_MIME_LEN equ $ - ICO_MIME
 
     ; ============================== File Locations ==============================
@@ -59,7 +57,7 @@ DATA = """section .data
 
 TEXT = """
 section .bss
-    response_headers resb 256
+    response_headers resb 512 
 
 section .text
 global process_file
