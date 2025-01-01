@@ -16,16 +16,10 @@ BIN = server
 ASMFLAGS = -f elf64
 ASM_OPTIMIZE = -O0
 
-CC = gcc
-C_SRC = src/routing/dynamic.c
-C_BIN = dynamic
-CFLAGS = -Wall -Wextra -Werror -std=c99 -pedantic
-C_OPTIMIZE = -O0
-
 # ============= Configurations =============
 PORT = `cat PORT` # Random number because im quirky
 
-all: c runc asm run
+all: dyn asm run
 
 asm:
 	$(ASSEMBLER) $(SRC_DIR)/$(SRC) -o $(OBJ_DIR)/$(OBJ) $(ASMFLAGS) $(ASM_OPTIMIZE)
@@ -38,8 +32,5 @@ run:
 clean:
 	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/$(BIN)
 
-c:
-	$(CC) $(C_SRC) -o $(BIN_DIR)/$(C_BIN) $(CFLAGS) $(C_OPTIMIZE)
-
-runc:
-	$(BIN_DIR)/$(C_BIN)	
+dyn:
+	python3.13 src/routing/dynamic.py

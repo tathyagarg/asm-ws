@@ -1,4 +1,7 @@
-section .data
+RFILE = "templates/.endpoints"
+WFILE = "src/routing/routing.asm"
+
+DATA = """section .data
     ; ============================== File Extensions ==============================
     HTML_EXT db "lmth", 0
     HTML_EXT_LEN equ $ - HTML_EXT
@@ -52,25 +55,9 @@ section .data
     ; ============================== File Locations ==============================
     fl_not_found db "templates/not_found.html", 0
     
-    ep_ db "/", 0
-    fl_ep_ db "templates/index.html", 0
+"""
 
-    ep_index_html db "/index.html", 0
-    fl_ep_index_html db "templates/index.html", 0
-
-    ep_404 db "/404", 0
-    fl_ep_404 db "templates/not_found.html", 0
-
-    ep_about db "/about", 0
-    fl_ep_about db "templates/about.html", 0
-
-    ep_favicon_ico db "/favicon.ico", 0
-    fl_ep_favicon_ico db "templates/favicon.ico", 0
-
-    ep_style_css db "/style.css", 0
-    fl_ep_style_css db "templates/style.css", 0
-
-
+TEXT = """
 section .bss
     response_headers resb 256
 
@@ -92,62 +79,50 @@ process_file:
     call f_process_file_ext
     pop rsi
 
-    .ep_:
-        mov  rdi, ep_
-        mov  rcx, r10
-        call f_match_path
-        cmp  rax, 1
-        jne  .ep_index_html
-        mov  rdi, fl_ep_
-        ret
+"""
 
-    .ep_index_html:
-        mov  rdi, ep_index_html
-        mov  rcx, r10
-        call f_match_path
-        cmp  rax, 1
-        jne  .ep_404
-        mov  rdi, fl_ep_index_html
-        ret
 
-    .ep_404:
-        mov  rdi, ep_404
-        mov  rcx, r10
-        call f_match_path
-        cmp  rax, 1
-        jne  .ep_about
-        mov  rdi, fl_ep_404
-        ret
+def parser(rfile):
+    with open(rfile, "r") as f:
+        lines = f.readlines()
 
-    .ep_about:
-        mov  rdi, ep_about
-        mov  rcx, r10
-        call f_match_path
-        cmp  rax, 1
-        jne  .ep_favicon_ico
-        mov  rdi, fl_ep_about
-        ret
+    with open(WFILE, "w") as f:
+        f.write(DATA)
+        eps: list[str] = []
+        fls: list[str] = []
 
-    .ep_favicon_ico:
-        mov  rdi, ep_favicon_ico
-        mov  rcx, r10
-        call f_match_path
-        cmp  rax, 1
-        jne  .ep_style_css
-        mov  rdi, fl_ep_favicon_ico
-        ret
+        for line in lines:
+            line = line.strip()
 
-    .ep_style_css:
-        mov  rdi, ep_style_css
-        mov  rcx, r10
-        call f_match_path
-        cmp  rax, 1
-        jne  .not_found
-        mov  rdi, fl_ep_style_css
-        ret
+            ep, file_location = line.split(" ")
 
-    .not_found:
-        mov  rdi, fl_not_found
-        mov  r9, HTTP_404
-        mov  r8, HTTP_404_LEN
-        ret
+            ep_normalized = "ep" + ep.replace("/", "_").replace(".", "_")
+            fl_normalized = "fl_" + ep_normalized
+
+            f.write(f'    {ep_normalized} db "{ep}", 0\n')
+            f.write(f'    {fl_normalized} db "templates/{file_location}", 0\n\n')
+
+            eps.append(ep_normalized)
+            fls.append(fl_normalized)
+
+        f.write(TEXT)
+        for i, (ep, fl) in enumerate(zip(eps, fls)):
+            next_ep = eps[i + 1] if i + 1 < len(eps) else "not_found"
+
+            f.write(f"    .{ep}:\n")
+            f.write(f"        mov  rdi, {ep}\n")
+            f.write(f"        mov  rcx, r10\n")
+            f.write(f"        call f_match_path\n")
+            f.write(f"        cmp  rax, 1\n")
+            f.write(f"        jne  .{next_ep}\n")
+            f.write(f"        mov  rdi, {fl}\n")
+            f.write(f"        ret\n\n")
+
+        f.write(f"    .not_found:\n")
+        f.write(f"        mov  rdi, fl_not_found\n")
+        f.write(f"        mov  r9, HTTP_404\n")
+        f.write(f"        mov  r8, HTTP_404_LEN\n")
+        f.write(f"        ret\n")
+
+
+parser(RFILE)

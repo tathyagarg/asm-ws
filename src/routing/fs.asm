@@ -102,28 +102,28 @@ f_process_file_ext:
     jne   .not_found
 
     .html:
-        mov  r9, html_http_200
-        mov  r8, html_http_200_len
+        mov  r9, HTML_MIME
+        mov  r8, HTML_MIME_LEN
         jmp .found
 
     .css:
-        mov  r9, css_http_200
-        mov  r8, css_http_200_len
+        mov  r9, CSS_MIME
+        mov  r8, CSS_MIME_LEN
         jmp .found
 
     .js:
-        mov  r9, js_http_200
-        mov  r8, js_http_200_len
+        mov  r9, JS_MIME
+        mov  r8, JS_MIME_LEN
         jmp .found
 
     .png:
-        mov  r9, png_http_200
-        mov  r8, png_http_200_len
+        mov  r9, PNG_MIME
+        mov  r8, PNG_MIME_LEN
         jmp .found
 
     .ico:
-        mov  r9, ico_http_200
-        mov  r8, ico_http_200_len
+        mov  r9, ICO_MIME
+        mov  r8, ICO_MIME_LEN
         jmp .found
 
     ; Add HTTP 200 Headers
@@ -135,19 +135,33 @@ f_process_file_ext:
         mov  rcx, HTTP_200_LEN 
         rep  movsb
 
-        lea  rsi, [r9]
+        lea  rsi, [Content_Type]
         lea  rdi, [rax + HTTP_200_LEN]
+        mov  rcx, Content_Type_LEN
+        rep  movsb
+
+        lea  rsi, [r9]
+        lea  rdi, [rax + HTTP_200_LEN + Content_Type_LEN]
         mov  rcx, r8
         rep  movsb
 
-        mov  byte [rax + HTTP_200_LEN + r8], 0
+        ; Add CRLF, CRLF, NULL
+        mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 0], 0dh
+        mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 1], 0ah
+        mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 2], 0dh
+        mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 3], 0ah
+        mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 4], 0h
+
         mov  r9, rax
         add  r8, HTTP_200_LEN
+        add  r8, Content_Type_LEN
+        add  r8, 4
+
         ret
 
     .not_found:
-        mov  r9, not_found_http_404
-        mov  r8, not_found_http_404_len
+        mov  r9, HTTP_404
+        mov  r8, HTTP_404_LEN
         ret
 
 
