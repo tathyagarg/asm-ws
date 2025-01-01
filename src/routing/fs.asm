@@ -94,27 +94,60 @@ f_process_file_ext:
     cmp  rax, 1
     je   .ico
 
+    mov  rdi, NO_EXT
+    mov  rcx, r10
+    mov  r9,  NO_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    jne   .not_found
+
     .html:
         mov  r9, html_http_200
         mov  r8, html_http_200_len
-        ret
+        jmp .found
 
     .css:
         mov  r9, css_http_200
         mov  r8, css_http_200_len
-        ret
+        jmp .found
 
     .js:
         mov  r9, js_http_200
         mov  r8, js_http_200_len
-        ret
+        jmp .found
 
     .png:
         mov  r9, png_http_200
         mov  r8, png_http_200_len
-        ret
+        jmp .found
 
     .ico:
         mov  r9, ico_http_200
         mov  r8, ico_http_200_len
+        jmp .found
+
+    ; Add HTTP 200 Headers
+    .found:
+        lea  rax, [response_headers]
+
+        lea  rsi, [HTTP_200]
+        lea  rdi, [rax]
+        mov  rcx, HTTP_200_LEN 
+        rep  movsb
+
+        lea  rsi, [r9]
+        lea  rdi, [rax + HTTP_200_LEN]
+        mov  rcx, r8
+        rep  movsb
+
+        mov  byte [rax + HTTP_200_LEN + r8], 0
+        mov  r9, rax
+        add  r8, HTTP_200_LEN
         ret
+
+    .not_found:
+        mov  r9, not_found_http_404
+        mov  r8, not_found_http_404_len
+        ret
+
+

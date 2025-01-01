@@ -15,38 +15,37 @@ section .data
     ICO_EXT      db      "oci",  0h
     ICO_EXT_LEN  equ     $ - ICO_EXT
 
+    NO_EXT      db      "/",  0h
+    NO_EXT_LEN  equ     $ - NO_EXT
+
     ; ============= Responses ============
-    html_http_200:
+    HTTP_200:
         db      "HTTP/1.1 200 OK",                      0dh, 0ah
         db      "Server: Tathya's Awesome Server",      0dh, 0ah
+        db                                              0h
+    HTTP_200_LEN equ $ - HTTP_200
+
+    html_http_200:
         db      "Content-Type: text/html",              0dh, 0ah
         db                                              0dh, 0ah
     html_http_200_len equ $ - html_http_200
 
     css_http_200:
-        db      "HTTP/1.1 200 OK",                      0dh, 0ah
-        db      "Server: Tathya's Awesome Server",      0dh, 0ah
         db      "Content-Type: text/css",               0dh, 0ah
         db                                              0dh, 0ah
     css_http_200_len equ $ - css_http_200
 
     js_http_200:
-        db      "HTTP/1.1 200 OK",                      0dh, 0ah
-        db      "Server: Tathya's Awesome Server",      0dh, 0ah
         db      "Content-Type: application/javascript", 0dh, 0ah
         db                                              0dh, 0ah
     js_http_200_len equ $ - js_http_200
 
     png_http_200:
-        db      "HTTP/1.1 200 OK",                      0dh, 0ah
-        db      "Server: Tathya's Awesome Server",      0dh, 0ah
         db      "Content-Type: image/png",              0dh, 0ah
         db                                              0dh, 0ah
     png_http_200_len equ $ - png_http_200
 
     ico_http_200:
-        db      "HTTP/1.1 200 OK",                      0dh, 0ah
-        db      "Server: Tathya's Awesome Server",      0dh, 0ah
         db      "Content-Type: image/x-icon",           0dh, 0ah
         db                                              0dh, 0ah
     ico_http_200_len equ $ - ico_http_200
@@ -76,6 +75,9 @@ section .data
 
     ep_style_css     db "/style.css", 0h
     fl_ep_style_css     db "templates/style.css", 0h
+
+section .bss
+     response_headers resb 256
 
 section .text
 global process_file

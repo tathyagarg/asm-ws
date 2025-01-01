@@ -1,3 +1,10 @@
+/*
+ * This program reads the .endpoints file and generates the routing.asm file
+ * which contains the assembly code for routing the requests to the correct
+ * file.
+ *
+ * */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,38 +27,37 @@
   "    ICO_EXT      db      \"oci\",  0h\n"                                    \
   "    ICO_EXT_LEN  equ     $ - ICO_EXT\n"                                     \
   "\n"                                                                         \
+  "    NO_EXT      db      \"/\",  0h\n"                                       \
+  "    NO_EXT_LEN  equ     $ - NO_EXT\n"                                       \
+  "\n"                                                                         \
   "    ; ============= Responses ============\n"                               \
-  "    html_http_200:\n"                                                       \
+  "    HTTP_200:\n"                                                            \
   "        db      \"HTTP/1.1 200 OK\",                      0dh, 0ah\n"       \
   "        db      \"Server: Tathya's Awesome Server\",      0dh, 0ah\n"       \
+  "        db                                              0h\n"               \
+  "    HTTP_200_LEN equ $ - HTTP_200\n"                                        \
+  "\n"                                                                         \
+  "    html_http_200:\n"                                                       \
   "        db      \"Content-Type: text/html\",              0dh, 0ah\n"       \
   "        db                                              0dh, 0ah\n"         \
   "    html_http_200_len equ $ - html_http_200\n"                              \
   "\n"                                                                         \
   "    css_http_200:\n"                                                        \
-  "        db      \"HTTP/1.1 200 OK\",                      0dh, 0ah\n"       \
-  "        db      \"Server: Tathya's Awesome Server\",      0dh, 0ah\n"       \
   "        db      \"Content-Type: text/css\",               0dh, 0ah\n"       \
   "        db                                              0dh, 0ah\n"         \
   "    css_http_200_len equ $ - css_http_200\n"                                \
   "\n"                                                                         \
   "    js_http_200:\n"                                                         \
-  "        db      \"HTTP/1.1 200 OK\",                      0dh, 0ah\n"       \
-  "        db      \"Server: Tathya's Awesome Server\",      0dh, 0ah\n"       \
   "        db      \"Content-Type: application/javascript\", 0dh, 0ah\n"       \
   "        db                                              0dh, 0ah\n"         \
   "    js_http_200_len equ $ - js_http_200\n"                                  \
   "\n"                                                                         \
   "    png_http_200:\n"                                                        \
-  "        db      \"HTTP/1.1 200 OK\",                      0dh, 0ah\n"       \
-  "        db      \"Server: Tathya's Awesome Server\",      0dh, 0ah\n"       \
   "        db      \"Content-Type: image/png\",              0dh, 0ah\n"       \
   "        db                                              0dh, 0ah\n"         \
   "    png_http_200_len equ $ - png_http_200\n"                                \
   "\n"                                                                         \
   "    ico_http_200:\n"                                                        \
-  "        db      \"HTTP/1.1 200 OK\",                      0dh, 0ah\n"       \
-  "        db      \"Server: Tathya's Awesome Server\",      0dh, 0ah\n"       \
   "        db      \"Content-Type: image/x-icon\",           0dh, 0ah\n"       \
   "        db                                              0dh, 0ah\n"         \
   "    ico_http_200_len equ $ - ico_http_200\n"                                \
@@ -65,6 +71,9 @@
   "    fl_not_found db \"templates/not_found.html\",         0h\n\n"           \
 
 #define TEXT                                                                   \
+  "section .bss\n "                                                            \
+  "    response_headers resb 256\n"                                            \
+  "\n"                                                                         \
   "section .text\n"                                                            \
   "global process_file\n"                                                      \
   "\n"                                                                         \
