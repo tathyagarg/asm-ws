@@ -16,6 +16,9 @@ BIN = server
 ASMFLAGS = -f elf64
 ASM_OPTIMIZE = -O0
 
+PYTHON = python3.13
+PYTHON_FILE = src/routing/dynamic.py
+
 # ============= Configurations =============
 PORT = `cat PORT` # Random number because im quirky
 
@@ -33,4 +36,4 @@ clean:
 	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/$(BIN)
 
 dyn:
-	python3.13 src/routing/dynamic.py
+	$(PYTHON) $(PYTHON_FILE)
