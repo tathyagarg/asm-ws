@@ -1,9 +1,9 @@
 ; ========== Match Path ==========
-; Compares the path in [path] to the given path
+; Compares the path in rsi to the given path
 ;
 ; Returns 1 if the paths match, 0 otherwise
 ; Path to match is passed in in rdi
-; Path to match against is in [path]
+; Path to match against is in rsi
 f_match_path:
     push rsi
     .match_path:
@@ -145,7 +145,7 @@ f_process_file_ext:
         mov  rcx, r8
         rep  movsb
 
-        ; Add CRLF, CRLF, NULL
+        ; Add CRLF, CRLF 
         mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 0], 0dh
         mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 1], 0ah
         mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 2], 0dh

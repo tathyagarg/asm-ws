@@ -20,10 +20,10 @@ section .data
     startup_msg_len equ $ - startup_msg
 
     ; ============= Debug =============
-    %define DEBUG_HEADERS    0
-    %define DEBUG_METHOD     0
-    %define DEBUG_PATH       0
-    %define DEBUG_RESP       0
+    %define DEBUG_HEADERS    1
+    %define DEBUG_METHOD     1
+    %define DEBUG_PATH       1
+    %define DEBUG_RESP       1
 
     ; ============= Files =============
     file_ptr    dq      0
@@ -46,13 +46,13 @@ section .data
     idx_PUT    equ      2
     idx_DELETE equ      3
 
-    ; ============= File System =============
-    ; HTML_FILE   equ      0
-    ; CSS_FILE    equ      1
+    ; ============= Response Types =============
+    RT_FILE    equ      0
+    RT_EXEC    equ      1
 
 section .bss
     socket_addr resq    1  ; Declare 8 bytes of uninitialized memory
-    method      resb    32
+    method      resb    1 
     path        resb    256
 
     port        resw    1
@@ -65,7 +65,6 @@ global _start
 %include 'src/functions.asm'
 %include 'src/sockets.asm'
 %include 'src/parser.asm'
-; %include 'src/fs.asm'
 
 error_handler:
     cmp  rax, 0
@@ -217,7 +216,7 @@ accept:
     %if DEBUG_HEADERS
         mov  rsi, req_buf
         mov  rdx, [req_len]
-        call print
+        call printLF
     %endif
 
 parse_headers:
@@ -226,16 +225,16 @@ parse_headers:
 
     .method:
         %if DEBUG_METHOD
-            cmp  word [method], idx_GET
+            cmp  byte [method], idx_GET
             je   .print_get 
 
-            cmp  word [method], idx_POST
+            cmp  byte [method], idx_POST
             je   .print_post 
 
-            cmp  word [method], idx_PUT
+            cmp  byte [method], idx_PUT
             je   .print_put
 
-            cmp  word [method], idx_DELETE
+            cmp  byte [method], idx_DELETE
             je   .print_delete
 
             .print_get:
@@ -272,32 +271,54 @@ parse_headers:
 process_request:
     mov  rsi, path
     mov  r10, [path_len]
+    movzx r9, byte [method]
     call process_file
     push r9
     push r8
 
 send_headers:
-    call so_open_file
-    cmp  rax, 0
-    jle  close_client                           ; Error
+    cmp  r11, RT_FILE
+    je   .file
 
-    ; Reset the counter
-    mov  rcx, qword 0
-    mov  [file_ptr], rax
+    cmp  r11, RT_EXEC
+    je   .exec
 
-    ; Write the HTTP 200 OK headers
-    mov  rdi, [client]
-    pop  rdx
-    pop  rsi
-    call so_write_socket
+    .file:
+        call so_open_file
+        cmp  rax, 0
+        jle  close_client                           ; Error
+    
+        ; Reset the counter
+        mov  rcx, qword 0
+        mov  [file_ptr], rax
+    
+        ; Write the HTTP 200 OK headers
+        mov  rdi, [client]
+        pop  rdx
+        pop  rsi
+        call so_write_socket
+    
+        %if DEBUG_RESP
+            call printLF
+        %endif
+    
+        ; Send the file
+        mov  rbx, [file_ptr]
+        call send_file
 
-    %if DEBUG_RESP
-        call printLF
-    %endif
+        jmp  close_client
 
-    ; Send the file
-    mov  rbx, [file_ptr]
-    call send_file
+    .exec:
+        mov  rax, 58
+        syscall
+
+        test rax, rax
+        jz   .child
+        jg   close_client
+
+        .child:
+            mov  rax, 59
+            syscall
 
 close_client:
     ; Close the client connection

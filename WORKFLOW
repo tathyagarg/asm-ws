@@ -1,0 +1,4 @@
+Request Received
+Headers Parsed
+Method and Endpoint locations
+Method based Endpoint resolution

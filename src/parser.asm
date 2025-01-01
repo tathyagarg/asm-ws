@@ -57,19 +57,19 @@ p_parse_method:
     ret
 
     .get:
-        mov  word [method], idx_GET 
+        mov  byte [method], idx_GET 
         ret
 
     .post:
-        mov  word [method], idx_POST
+        mov  byte [method], idx_POST
         ret
 
     .put:
-        mov  word [method], idx_PUT
+        mov  byte [method], idx_PUT
         ret
 
     .delete:
-        mov  word [method], idx_DELETE
+        mov  byte [method], idx_DELETE
         ret
 
 ; ============== Parse HTTP Request Method =============
