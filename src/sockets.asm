@@ -10,9 +10,9 @@
 ; 
 ; Returns: socket file descriptor
 so_create_socket:
-    mov     rax, 41                  ; sys_socket()
-    mov     rdi, 2                   ; AF_INET
-    mov     rsi, 1                   ; SOCK_STREAM
+    mov     rax, SYS_SOCKET          ; sys_socket()
+    mov     rdi, AF_INET             ; AF_INET
+    mov     rsi, SOCK_STREAM         ; SOCK_STREAM
     mov     rdx, 0                   ; Protocol
     syscall
     ret
@@ -29,7 +29,7 @@ so_create_socket:
 ; 
 ; Returns: 0 on success, -1 on error
 so_close_socket:
-    mov     rax, 48                  ; sys_shutdown()
+    mov     rax, SYS_SHUTDOWN        ; sys_shutdown()
     mov     rsi, 2                   ; SHUT_RDWR
     syscall
     ret
@@ -47,7 +47,7 @@ so_close_socket:
 ;
 ; Returns: 0 on success, -1 on error
 so_set_socket_options:
-    mov     rax, 54                  ; sys_setsockopt()
+    mov     rax, SYS_SETSOCKOPT      ; sys_setsockopt()
     mov     rsi, 1                   ; SOL_SOCKET
     mov     rdx, 2                   ; SO_REUSEADDR
     mov     r8,  dword 4             ; Load option_len
@@ -65,7 +65,7 @@ so_set_socket_options:
 ; 
 ; Returns: 0 on success, -1 on error
 so_bind_socket:
-    mov     rax, 49                  ; sys_bind()
+    mov     rax, SYS_BIND            ; sys_bind()
     mov     rdx, 16                  ; Load 16 byte socket address size
     syscall
     ret
@@ -80,7 +80,7 @@ so_bind_socket:
 ;
 ; Returns: 0 on success, -1 on error
 so_listen:
-    mov     rax, 50                  ; sys_listen()
+    mov     rax, SYS_LISTEN           ; sys_listen()
     syscall
     ret
 
@@ -95,7 +95,7 @@ so_listen:
 ;
 ; Returns: socket file descriptor on success, -1 on error
 so_accept_connection:
-    mov     rax, 43                  ; sys_accept()
+    mov     rax, SYS_ACCEPT          ; sys_accept()
     mov     rsi, 0                   ; NULL
     mov     rdx, 0                   ; NULL
     syscall
@@ -112,7 +112,7 @@ so_accept_connection:
 ;
 ; Returns: Number of bytes read on success, -1 on error
 so_read_socket:
-    mov     rax, 0                   ; sys_read()
+    mov     rax, SYS_READ                   ; sys_read()
     syscall
     ret
 
@@ -126,8 +126,8 @@ so_read_socket:
 ;
 ; Returns: File descriptor on success, -1 on error
 so_open_file:
-    mov     rax, 2                   ; sys_open()
-    mov     rsi, 0                   ; O_RDONLY
+    mov     rax, SYS_OPEN                   ; sys_open()
+    mov     rsi, 0                          ; O_RDONLY
     syscall
     ret
 
@@ -142,6 +142,6 @@ so_open_file:
 ;
 ; Returns: Number of bytes written on success, -1 on error
 so_write_socket:
-    mov     rax, 1                   ; sys_write()
+    mov     rax, SYS_WRITE                   ; sys_write()
     syscall
     ret

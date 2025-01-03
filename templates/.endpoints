@@ -7,5 +7,5 @@ GET
 /style.css style.css
 
 POST
-/hello bin/hello
-/bye bye.sh
+/hello bin/hello tmp/output.response
+/bye bye.sh tmp/output.response

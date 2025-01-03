@@ -84,10 +84,12 @@ section .data
     post_fl_ep_hello db "templates/post_responses/bin/hello", 0
     arg_ep_hello dq post_fl_ep_hello, 0
 
+    resp_ep_hello db "tmp/output.response", 0
     post_ep_bye db "/bye", 0
     post_fl_ep_bye db "templates/post_responses/bye.sh", 0
     arg_ep_bye dq post_fl_ep_bye, 0
 
+    resp_ep_bye db "tmp/output.response", 0
 
 section .bss
     response_headers resb 512 
@@ -186,6 +188,7 @@ process_file:
             lea  rdi, [post_fl_ep_hello]
             lea  rsi, [arg_ep_hello]
             lea  rdx, [NULL]
+            mov  r9, resp_ep_hello
             ret
     
         .ep_bye:
@@ -197,6 +200,7 @@ process_file:
             lea  rdi, [post_fl_ep_bye]
             lea  rsi, [arg_ep_bye]
             lea  rdx, [NULL]
+            mov  r9, resp_ep_bye
             ret
     
     .not_found:

@@ -1,12 +1,12 @@
 quit:
-    mov rax, 60
-    mov rdi, 0
+    mov rax, 60 
+    mov rdi, 0 
     syscall
     ret
 
 ; Quits with the error code in rdi 
 quit_err:
-    mov rax, 60
+    mov rax, 60 
     syscall
     ret
 
@@ -19,8 +19,8 @@ quit_err:
 ; rsi: Message (provided by caller)
 ; rdx: Message Length (provided by caller)
 print:
-    mov  rax, 1                ; sys_write()
-    mov  rdi, 1                ; STDOUT
+    mov  rax, 1 ; sys_write()
+    mov  rdi, 1 ; STDOUT
     syscall
     ret
 
@@ -51,8 +51,6 @@ print_unk:
     
     .count:
         cmp  byte [rbx], 0
-
-    .sigma:
         je   .print
         inc  rdx
         inc  rbx
@@ -71,3 +69,16 @@ print_unk:
         pop  rbx
         pop  rbp
         ret
+
+; ======= Duplicate File Descriptor =======
+; int dup2(int oldfd, int newfd)
+;    Source: https://pubs.opengroup.org/onlinepubs/009695399/functions/dup2.html
+;
+; The opcode for sys_dup2() is 33
+; oldfd: File Descriptor to duplicate (provided by caller in rdi)
+; newfd: New File Descriptor (provided by caller in rsi)
+;
+dup_fd:
+    mov  rax, 33 ; sys_dup2()
+    syscall
+    ret

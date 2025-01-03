@@ -1,4 +1,6 @@
 section .data
+    post_op_buf db "tmp/output.json", 0
+
     socket      dq      0
     socket_on   dq      1
     max_backlog dw      10
@@ -20,10 +22,10 @@ section .data
     startup_msg_len equ $ - startup_msg
 
     ; ============= Debug =============
-    %define DEBUG_HEADERS    1
-    %define DEBUG_METHOD     1
-    %define DEBUG_PATH       1
-    %define DEBUG_RESP       1
+    %define DEBUG_HEADERS    0
+    %define DEBUG_METHOD     0
+    %define DEBUG_PATH       0
+    %define DEBUG_RESP       0
 
     ; ============= Files =============
     file_ptr    dq      0
@@ -49,6 +51,32 @@ section .data
     ; ============= Response Types =============
     RT_FILE    equ      0
     RT_EXEC    equ      1
+
+    ; ============= System Calls =============
+    %define SYS_READ        0
+    %define SYS_WRITE       1
+    %define SYS_OPEN        2
+    %define SYS_DUP         32
+    %define SYS_DUP2        33
+    %define SYS_SOCKET      41
+    %define SYS_ACCEPT      43
+    %define SYS_SHUTDOWN    48
+    %define SYS_BIND        49
+    %define SYS_LISTEN      50
+    %define SYS_SETSOCKOPT  54
+    %define SYS_VFORK       58
+    %define SYS_EXECVE      59
+    %define SYS_EXIT        60
+    %define SYS_WAIT4       61
+
+    ; ============= Constants =============
+    EXIT_SUCCESS   equ      0
+    STDOUT         equ      1
+    AF_INET        equ      2
+    SOCK_STREAM    equ      1
+    O_WRONLY       equ      0001o
+    O_CREAT        equ      0100o
+    O_TRUNC        equ      1000o
 
 section .bss
     socket_addr resq    1  ; Declare 8 bytes of uninitialized memory
@@ -120,7 +148,6 @@ make_int:
 
         sub  bl, 30h
 
-        ; rax = rax * 10 + bl
         imul rax, rax, 10
         add  rax, rbx
         inc  rsi
@@ -309,15 +336,26 @@ send_headers:
         jmp  close_client
 
     .exec:
-        mov  rax, 58
+        mov  rax, SYS_VFORK
         syscall
 
         test rax, rax
         jz   .child
-        jg   close_client
+
+        ; Wait for child process to complete with sys_wait4
+        mov  rdi, 0
+        mov  rsi, 0
+        mov  rdx, 0
+        mov  r10, 0
+        mov  rax, SYS_WAIT4
+        syscall
+
+        pop  rdi
+        pop  rdi
+        jmp  .file
 
         .child:
-            mov  rax, 59
+            mov  rax, SYS_EXECVE
             syscall
 
 close_client:

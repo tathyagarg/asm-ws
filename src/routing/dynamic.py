@@ -140,6 +140,7 @@ EP_FORMATS = {
             lea  rdi, [post_{fl}]
             lea  rsi, [arg_{ep}]
             lea  rdx, [NULL]
+            mov  r9, resp_{ep}
             ret
     """,
 }
@@ -175,7 +176,11 @@ def parser(rfile):
             if not line:
                 continue
 
-            ep, file_location = line.split(" ")
+            if curr_method == Method.POST:
+                ep, file_location, response = line.split(" ")
+            else:
+                ep, file_location = line.split(" ")
+                response = None  # To make pyright shut up
 
             ep_normalized = "ep" + ep.replace("/", "_").replace(".", "_")
             fl_normalized = "fl_" + ep_normalized
@@ -188,6 +193,7 @@ def parser(rfile):
                 f.write(
                     f"    arg_{ep_normalized} dq {curr_method!s}_{fl_normalized}, 0\n\n"
                 )
+                f.write(f'    resp_{ep_normalized} db "{response}", 0\n')
             else:
                 f.write("\n")
 
