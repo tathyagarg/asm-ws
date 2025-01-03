@@ -17,6 +17,12 @@ section .data
     ICO_EXT       db "oci", 0
     ICO_EXT_LEN   equ $ - ICO_EXT
 
+    JSON_EXT      db "nosj", 0
+    JSON_EXT_LEN  equ $ - JSON_EXT
+
+    OS_EXT        db "o", 0
+    OS_EXT_LEN    equ $ - OS_EXT
+
     NO_EXT        db "/", 0
     NO_EXT_LEN    equ $ - NO_EXT
 
@@ -48,6 +54,12 @@ section .data
 
     ICO_MIME         db "image/x-icon"
     ICO_MIME_LEN     equ $ - ICO_MIME
+
+    JSON_MIME        db "application/json"
+    JSON_MIME_LEN    equ $ - JSON_MIME
+
+    OS_MIME          db "application/octet-stream"
+    OS_MIME_LEN      equ $ - OS_MIME
 
     ; ============================== Response Types ==============================
     RESPONSE_FILE  equ 0
@@ -83,22 +95,27 @@ section .data
     post_ep_hello db "/hello", 0
     post_fl_ep_hello db "templates/post_responses/bin/hello", 0
     arg_ep_hello dq post_fl_ep_hello, 0
-
     resp_ep_hello db "tmp/output.response", 0
+    resp_mime_ep_hello equ JSON_MIME
+    resp_mime_len_ep_hello equ JSON_MIME_LEN
+
     post_ep_bye db "/bye", 0
     post_fl_ep_bye db "templates/post_responses/bye.sh", 0
     arg_ep_bye dq post_fl_ep_bye, 0
+    resp_ep_bye db "templates/post_responses/bin/hello.o", 0
+    resp_mime_ep_bye equ OS_MIME
+    resp_mime_len_ep_bye equ OS_MIME_LEN
 
-    resp_ep_bye db "tmp/output.response", 0
 
 section .bss
     response_headers resb 512 
 
 section .text
-global process_file
 
 %include "src/routing/fs.asm"
 %include "src/functions.asm"
+
+global process_file, make_headers
 
 ; ============================== process_file ==============================
 ; Checks if the path matches any of the files
@@ -189,6 +206,8 @@ process_file:
             lea  rsi, [arg_ep_hello]
             lea  rdx, [NULL]
             mov  r9, resp_ep_hello
+            mov  r8, resp_mime_ep_hello
+            mov  r10, resp_mime_len_ep_hello
             ret
     
         .ep_bye:
@@ -201,6 +220,8 @@ process_file:
             lea  rsi, [arg_ep_bye]
             lea  rdx, [NULL]
             mov  r9, resp_ep_bye
+            mov  r8, resp_mime_ep_bye
+            mov  r10, resp_mime_len_ep_bye
             ret
     
     .not_found:

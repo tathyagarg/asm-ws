@@ -7,5 +7,6 @@ GET
 /style.css style.css
 
 POST
-/hello bin/hello tmp/output.response
-/bye bye.sh tmp/output.response
+/hello bin/hello tmp/output.response JSON
+# /bye bye.sh tmp/output.response JSON
+/bye bye.sh templates/post_responses/bin/hello.o OS

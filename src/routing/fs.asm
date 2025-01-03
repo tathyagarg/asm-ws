@@ -58,6 +58,11 @@ f_match_file_ext:
         pop  rsi
         ret
 
+; ========== Process File Extension ==========
+; Determines the HTTP Headers of the file based on the file extension
+;
+; Returns the HTTP Headers in r9 and the length in r8
+; File name is passed in in r10
 f_process_file_ext:
     mov  rdi, HTML_EXT
     mov  rcx, r10
@@ -128,35 +133,7 @@ f_process_file_ext:
 
     ; Add HTTP 200 Headers
     .found:
-        lea  rax, [response_headers]
-
-        lea  rsi, [HTTP_200]
-        lea  rdi, [rax]
-        mov  rcx, HTTP_200_LEN 
-        rep  movsb
-
-        lea  rsi, [Content_Type]
-        lea  rdi, [rax + HTTP_200_LEN]
-        mov  rcx, Content_Type_LEN
-        rep  movsb
-
-        lea  rsi, [r9]
-        lea  rdi, [rax + HTTP_200_LEN + Content_Type_LEN]
-        mov  rcx, r8
-        rep  movsb
-
-        ; Add CRLF, CRLF 
-        mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 0], 0dh
-        mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 1], 0ah
-        mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 2], 0dh
-        mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 3], 0ah
-
-
-        mov  r9, rax
-        add  r8, HTTP_200_LEN
-        add  r8, Content_Type_LEN
-        add  r8, 4
-
+        call make_headers
         ret
 
     .not_found:
@@ -164,4 +141,34 @@ f_process_file_ext:
         mov  r8, HTTP_404_LEN
         ret
 
+; ========== Make Headers ==========
+; Concatenates the HTTP Headers to the mime type in r9, putting length in r8
+make_headers:
+    lea  rax, [response_headers]
 
+    lea  rsi, [HTTP_200]
+    lea  rdi, [rax]
+    mov  rcx, HTTP_200_LEN 
+    rep  movsb
+
+    lea  rsi, [Content_Type]
+    lea  rdi, [rax + HTTP_200_LEN]
+    mov  rcx, Content_Type_LEN
+    rep  movsb
+
+    lea  rsi, [r9]
+    lea  rdi, [rax + HTTP_200_LEN + Content_Type_LEN]
+    mov  rcx, r8
+    rep  movsb
+
+    ; Add CRLF, CRLF 
+    mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 0], 0dh
+    mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 1], 0ah
+    mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 2], 0dh
+    mov  byte [rax + HTTP_200_LEN + Content_Type_LEN + r8 + 3], 0ah
+
+    mov  r9, rax
+    add  r8, HTTP_200_LEN
+    add  r8, Content_Type_LEN
+    add  r8, 4
+    ret

@@ -25,6 +25,12 @@ DATA = """section .data
     ICO_EXT       db "oci", 0
     ICO_EXT_LEN   equ $ - ICO_EXT
 
+    JSON_EXT      db "nosj", 0
+    JSON_EXT_LEN  equ $ - JSON_EXT
+
+    OS_EXT        db "o", 0
+    OS_EXT_LEN    equ $ - OS_EXT
+
     NO_EXT        db "/", 0
     NO_EXT_LEN    equ $ - NO_EXT
 
@@ -57,6 +63,12 @@ DATA = """section .data
     ICO_MIME         db "image/x-icon"
     ICO_MIME_LEN     equ $ - ICO_MIME
 
+    JSON_MIME        db "application/json"
+    JSON_MIME_LEN    equ $ - JSON_MIME
+
+    OS_MIME          db "application/octet-stream"
+    OS_MIME_LEN      equ $ - OS_MIME
+
     ; ============================== Response Types ==============================
     RESPONSE_FILE  equ 0
     RESPONSE_EXEC  equ 1
@@ -77,10 +89,11 @@ section .bss
     response_headers resb 512 
 
 section .text
-global process_file
 
 %include "src/routing/fs.asm"
 %include "src/functions.asm"
+
+global process_file, make_headers
 
 ; ============================== process_file ==============================
 ; Checks if the path matches any of the files
@@ -141,6 +154,8 @@ EP_FORMATS = {
             lea  rsi, [arg_{ep}]
             lea  rdx, [NULL]
             mov  r9, resp_{ep}
+            mov  r8, resp_mime_{ep}
+            mov  r10, resp_mime_len_{ep}
             ret
     """,
 }
@@ -168,6 +183,9 @@ def parser(rfile):
         f.write(DATA)
 
         for line in lines:
+            if line.startswith("#"):
+                continue
+
             line = line.strip()
             if m := re.match(r"^(GET|POST|PUT|DELETE)$", line):
                 curr_method = Method[m.group(0)]
@@ -177,10 +195,10 @@ def parser(rfile):
                 continue
 
             if curr_method == Method.POST:
-                ep, file_location, response = line.split(" ")
+                ep, file_location, response, rt = line.split(" ")
             else:
                 ep, file_location = line.split(" ")
-                response = None  # To make pyright shut up
+                response = rt = None  # To make pyright shut up
 
             ep_normalized = "ep" + ep.replace("/", "_").replace(".", "_")
             fl_normalized = "fl_" + ep_normalized
@@ -191,9 +209,11 @@ def parser(rfile):
             )
             if curr_method == Method.POST:
                 f.write(
-                    f"    arg_{ep_normalized} dq {curr_method!s}_{fl_normalized}, 0\n\n"
+                    f"    arg_{ep_normalized} dq {curr_method!s}_{fl_normalized}, 0\n"
                 )
                 f.write(f'    resp_{ep_normalized} db "{response}", 0\n')
+                f.write(f"    resp_mime_{ep_normalized} equ {rt}_MIME\n")
+                f.write(f"    resp_mime_len_{ep_normalized} equ {rt}_MIME_LEN\n\n")
             else:
                 f.write("\n")
 

@@ -87,6 +87,7 @@ section .bss
 
 section .text
 extern process_file
+extern make_headers
 
 global _start
 
@@ -321,8 +322,8 @@ send_headers:
     
         ; Write the HTTP 200 OK headers
         mov  rdi, [client]
-        pop  rdx
-        pop  rsi
+        pop  rdx                                   ; Length of the headers
+        pop  rsi                                   ; Headers
         call so_write_socket
     
         %if DEBUG_RESP
@@ -336,6 +337,8 @@ send_headers:
         jmp  close_client
 
     .exec:
+        push r10
+
         mov  rax, SYS_VFORK
         syscall
 
@@ -350,8 +353,14 @@ send_headers:
         mov  rax, SYS_WAIT4
         syscall
 
+        pop  r8
+        pop  r9
+        call make_headers  ; r9 now holds the headers
+
         pop  rdi
-        pop  rdi
+        push r9
+        push r8
+
         jmp  .file
 
         .child:
