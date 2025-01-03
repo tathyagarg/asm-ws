@@ -75,27 +75,35 @@ section .data
     get_fl_not_found db "templates/not_found.html", 0
     
     get_ep_ db "/", 0
+    get_len_ep_ equ $ - get_ep_
     get_fl_ep_ db "templates/index.html", 0
 
     get_ep_index_html db "/index.html", 0
+    get_len_ep_index_html equ $ - get_ep_index_html
     get_fl_ep_index_html db "templates/index.html", 0
 
     get_ep_404 db "/404", 0
+    get_len_ep_404 equ $ - get_ep_404
     get_fl_ep_404 db "templates/not_found.html", 0
 
     get_ep_about db "/about", 0
+    get_len_ep_about equ $ - get_ep_about
     get_fl_ep_about db "templates/about.html", 0
 
     get_ep_favicon_ico db "/favicon.ico", 0
+    get_len_ep_favicon_ico equ $ - get_ep_favicon_ico
     get_fl_ep_favicon_ico db "templates/favicon.ico", 0
 
     get_ep_style_css db "/style.css", 0
+    get_len_ep_style_css equ $ - get_ep_style_css
     get_fl_ep_style_css db "templates/style.css", 0
 
     get_ep_hi_o db "/hi.o", 0
+    get_len_ep_hi_o equ $ - get_ep_hi_o
     get_fl_ep_hi_o db "templates/post_responses/bin/hello.o", 0
 
     post_ep_bye db "/bye", 0
+    post_len_ep_bye equ $ - post_ep_bye
     post_fl_ep_bye db "templates/post_responses/bye.sh", 0
     arg_ep_bye dq post_fl_ep_bye, 0
     resp_ep_bye db "templates/post_responses/bin/hello.o", 0
@@ -136,7 +144,7 @@ process_file:
     
         .ep_:
             mov  rdi, get_ep_ 
-            mov  rcx, r10
+            mov  rcx, get_len_ep_
             call f_match_path
             cmp  rax, 1
             jne  .ep_index_html
@@ -145,7 +153,7 @@ process_file:
     
         .ep_index_html:
             mov  rdi, get_ep_index_html 
-            mov  rcx, r10
+            mov  rcx, get_len_ep_index_html
             call f_match_path
             cmp  rax, 1
             jne  .ep_404
@@ -154,7 +162,7 @@ process_file:
     
         .ep_404:
             mov  rdi, get_ep_404 
-            mov  rcx, r10
+            mov  rcx, get_len_ep_404
             call f_match_path
             cmp  rax, 1
             jne  .ep_about
@@ -163,7 +171,7 @@ process_file:
     
         .ep_about:
             mov  rdi, get_ep_about 
-            mov  rcx, r10
+            mov  rcx, get_len_ep_about
             call f_match_path
             cmp  rax, 1
             jne  .ep_favicon_ico
@@ -172,7 +180,7 @@ process_file:
     
         .ep_favicon_ico:
             mov  rdi, get_ep_favicon_ico 
-            mov  rcx, r10
+            mov  rcx, get_len_ep_favicon_ico
             call f_match_path
             cmp  rax, 1
             jne  .ep_style_css
@@ -181,7 +189,7 @@ process_file:
     
         .ep_style_css:
             mov  rdi, get_ep_style_css 
-            mov  rcx, r10
+            mov  rcx, get_len_ep_style_css
             call f_match_path
             cmp  rax, 1
             jne  .ep_hi_o
@@ -190,7 +198,7 @@ process_file:
     
         .ep_hi_o:
             mov  rdi, get_ep_hi_o 
-            mov  rcx, r10
+            mov  rcx, get_len_ep_hi_o
             call f_match_path
             cmp  rax, 1
             jne  .not_found

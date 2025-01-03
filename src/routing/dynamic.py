@@ -137,7 +137,7 @@ HEADERS = {
 EP_FORMATS = {
     "get": """
             mov  rdi, get_{ep} 
-            mov  rcx, r10
+            mov  rcx, get_len_{ep}
             call f_match_path
             cmp  rax, 1
             jne  .{next_ep}
@@ -204,6 +204,9 @@ def parser(rfile):
             fl_normalized = "fl_" + ep_normalized
 
             f.write(f'    {curr_method!s}_{ep_normalized} db "{ep}", 0\n')
+            f.write(
+                f"    {curr_method!s}_len_{ep_normalized} equ $ - {curr_method!s}_{ep_normalized}\n"
+            )
             f.write(
                 f'    {curr_method!s}_{fl_normalized} db "{METHOD_PREFIXES[str(curr_method)]}/{file_location}", 0\n'
             )
