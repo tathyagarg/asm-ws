@@ -99,6 +99,20 @@ f_process_file_ext:
     cmp  rax, 1
     je   .ico
 
+    mov  rdi, JSON_EXT 
+    mov  rcx, r10
+    mov  r9,  JSON_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .json
+
+    mov  rdi, OS_EXT 
+    mov  rcx, r10
+    mov  r9,  OS_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .os
+
     mov  rdi, NO_EXT
     mov  rcx, r10
     mov  r9,  NO_EXT_LEN
@@ -129,6 +143,16 @@ f_process_file_ext:
     .ico:
         mov  r9, ICO_MIME
         mov  r8, ICO_MIME_LEN
+        jmp .found
+
+    .json:
+        mov  r9, JSON_MIME
+        mov  r8, JSON_MIME_LEN
+        jmp .found
+
+    .os:
+        mov  r9, OS_MIME
+        mov  r8, OS_MIME_LEN
         jmp .found
 
     ; Add HTTP 200 Headers

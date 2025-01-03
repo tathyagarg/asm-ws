@@ -22,8 +22,6 @@ PYTHON_FILE = src/routing/dynamic.py
 RESPONSES_DIR = templates/post_responses
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-value -Wno-unused-label -Wno-unused-result -Wno-unused-local-typedefs
-COPT = -O3
 POST_BIN = templates/post_responses/bin
 
 # ============= Configurations =============
@@ -47,6 +45,7 @@ dyn:
 
 responses:
 	for src_file in "$(RESPONSES_DIR)"/*.c; do\
-		$(CC) $(CFLAGS) $(COPT) -c $$src_file -o $(POST_BIN)/$$(basename $$src_file .c).o;\
+		$(CC) $$src_file -o $(POST_BIN)/$$(basename $$src_file .c).o;\
+		chmod +x $(POST_BIN)/$$(basename $$src_file .c).o;\
 	done
 

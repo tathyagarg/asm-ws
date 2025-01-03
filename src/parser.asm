@@ -1,5 +1,3 @@
-
-
 ; ============== Parse HTTP Request Headers =============
 ; Parses the HTTP request headers and stores them in the following format:
 ;   - Method: GET, POST, PUT, DELETE, etc. in [method]

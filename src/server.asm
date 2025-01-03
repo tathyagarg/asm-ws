@@ -1,6 +1,4 @@
 section .data
-    post_op_buf db "tmp/output.json", 0
-
     socket      dq      0
     socket_on   dq      1
     max_backlog dw      10
@@ -22,10 +20,10 @@ section .data
     startup_msg_len equ $ - startup_msg
 
     ; ============= Debug =============
-    %define DEBUG_HEADERS    0
-    %define DEBUG_METHOD     0
-    %define DEBUG_PATH       0
-    %define DEBUG_RESP       0
+    %define DEBUG_HEADERS    1
+    %define DEBUG_METHOD     1
+    %define DEBUG_PATH       1
+    %define DEBUG_RESP       1
 
     ; ============= Files =============
     file_ptr    dq      0

@@ -92,12 +92,8 @@ section .data
     get_ep_style_css db "/style.css", 0
     get_fl_ep_style_css db "templates/style.css", 0
 
-    post_ep_hello db "/hello", 0
-    post_fl_ep_hello db "templates/post_responses/bin/hello", 0
-    arg_ep_hello dq post_fl_ep_hello, 0
-    resp_ep_hello db "tmp/output.response", 0
-    resp_mime_ep_hello equ JSON_MIME
-    resp_mime_len_ep_hello equ JSON_MIME_LEN
+    get_ep_hi_o db "/hi.o", 0
+    get_fl_ep_hi_o db "templates/post_responses/bin/hello.o", 0
 
     post_ep_bye db "/bye", 0
     post_fl_ep_bye db "templates/post_responses/bye.sh", 0
@@ -188,27 +184,22 @@ process_file:
             mov  rcx, r10
             call f_match_path
             cmp  rax, 1
-            jne  .not_found
+            jne  .ep_hi_o
             mov  rdi, get_fl_ep_style_css 
+            ret
+    
+        .ep_hi_o:
+            mov  rdi, get_ep_hi_o 
+            mov  rcx, r10
+            call f_match_path
+            cmp  rax, 1
+            jne  .not_found
+            mov  rdi, get_fl_ep_hi_o 
             ret
     
     .post:
 
         mov  r11, RESPONSE_EXEC
-    
-        .ep_hello:
-            mov  rdi, post_ep_hello
-            mov  rcx, r10
-            call f_match_path
-            cmp  rax, 1
-            jne  .ep_bye
-            lea  rdi, [post_fl_ep_hello]
-            lea  rsi, [arg_ep_hello]
-            lea  rdx, [NULL]
-            mov  r9, resp_ep_hello
-            mov  r8, resp_mime_ep_hello
-            mov  r10, resp_mime_len_ep_hello
-            ret
     
         .ep_bye:
             mov  rdi, post_ep_bye
