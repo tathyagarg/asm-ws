@@ -34,6 +34,9 @@ f_match_path:
 f_match_file_ext:
     push rsi
     add  rsi, rcx
+
+    ; Go 2 characters backwards to get to the actual last character in rsi
+    dec  rsi
     dec  rsi
 
     .match_ext:
@@ -66,7 +69,7 @@ f_match_file_ext:
 f_process_file_ext:
     mov  rdi, HTML_EXT
     mov  rcx, r10
-    mov  r9,  HTML_EXT_LEN
+    mov  r9, HTML_EXT_LEN 
     call f_match_file_ext
     cmp  rax, 1
     je   .html

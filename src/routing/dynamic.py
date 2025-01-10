@@ -124,9 +124,6 @@ class Method(Enum):
 
 HEADERS = {
     "get": """
-        push rsi
-        call f_process_file_ext
-        pop  rsi
         mov  r11, RESPONSE_FILE
     """,
     "post": """
@@ -142,7 +139,8 @@ EP_FORMATS = {
             cmp  rax, 1
             jne  .{next_ep}
             mov  rdi, get_{fl} 
-            ret
+            mov  r10, get_len_{fl}
+            jmp  .get_done
     """,
     "post": """
             mov  rdi, post_{ep}
@@ -210,6 +208,9 @@ def parser(rfile):
             f.write(
                 f'    {curr_method!s}_{fl_normalized} db "{METHOD_PREFIXES[str(curr_method)]}/{file_location}", 0\n'
             )
+            f.write(
+                f"    {curr_method!s}_len_{fl_normalized} equ $ - {curr_method!s}_{fl_normalized}\n"
+            )
             if curr_method == Method.POST:
                 f.write(
                     f"    arg_{ep_normalized} dq {curr_method!s}_{fl_normalized}, 0\n"
@@ -240,6 +241,14 @@ def parser(rfile):
                 f.write(f"        .{ep}:")
                 f.write(EP_FORMATS[method].format(ep=ep, fl=fl, next_ep=next_ep))
                 f.write("\n")
+
+            if method == Method.GET.name.lower():
+                f.write(f"        .get_done:\n")
+                f.write(f"            mov  rsi, rdi\n")
+                f.write(f"            push rdi\n")
+                f.write(f"            call f_process_file_ext\n")
+                f.write(f"            pop  rdi\n")
+                f.write(f"            ret\n")
 
         f.write(f"    .not_found:\n")
         f.write(f"        mov  rdi, get_fl_not_found\n")

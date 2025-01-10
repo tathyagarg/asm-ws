@@ -5,7 +5,7 @@ GET
 /about about.html
 /favicon.ico favicon.ico
 /style.css style.css
-/hi.o post_responses/bin/hello.o
+/hi post_responses/bin/hello.o
 
 POST
 # This EP was never gonna work lol

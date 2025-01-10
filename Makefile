@@ -14,7 +14,7 @@ OBJ = $(SRC:.asm=.o)
 ROUTING_OBJ = routing.o
 BIN = server
 ASMFLAGS = -f elf64
-ASM_OPTIMIZE = -O0
+ASM_OPTIMIZE = -O3
 
 PYTHON = python3.13
 PYTHON_FILE = src/routing/dynamic.py
@@ -26,8 +26,20 @@ POST_BIN = templates/post_responses/bin
 
 # ============= Configurations =============
 PORT = `cat PORT` # Random number because im quirky
+ERR_LOG := tmp/err.log
+OUT_LOG := tmp/out.log
 
-all: dyn responses asm run
+.PHONY: all
+all: req dyn responses asm run
+
+.PHONY: req
+req:
+	mkdir -p templates/post_responses/bin
+	mkdir -p tmp
+	mkdir -p $(OBJ_DIR)
+	mkdir -p $(BIN_DIR)
+	touch $(ERR_LOG)
+	touch $(OUT_LOG)
 
 asm:
 	$(ASSEMBLER) $(SRC_DIR)/$(SRC) -o $(OBJ_DIR)/$(OBJ) $(ASMFLAGS) $(ASM_OPTIMIZE)
@@ -35,8 +47,9 @@ asm:
 	$(LINKER) $(OBJ_DIR)/$(ROUTING_OBJ) $(OBJ_DIR)/$(OBJ) -o $(BIN_DIR)/$(BIN)
 
 run:
-	./$(BIN_DIR)/$(BIN) $(PORT)
+	./$(BIN_DIR)/$(BIN) $(PORT) > $(OUT_LOG) 2> $(ERR_LOG)&
 
+.PHONY: clean
 clean:
 	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/$(BIN)
 
@@ -45,7 +58,8 @@ dyn:
 
 responses:
 	for src_file in "$(RESPONSES_DIR)"/*.c; do\
-		$(CC) $$src_file -o $(POST_BIN)/$$(basename $$src_file .c).o;\
-		chmod +x $(POST_BIN)/$$(basename $$src_file .c).o;\
+		$(CC) $$src_file -o $(POST_BIN)/$$(basename $$src_file .c).o -O3;\
 	done
 
+kill:
+	pkill -9 -x $(BIN)

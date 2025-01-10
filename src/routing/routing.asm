@@ -77,34 +77,42 @@ section .data
     get_ep_ db "/", 0
     get_len_ep_ equ $ - get_ep_
     get_fl_ep_ db "templates/index.html", 0
+    get_len_fl_ep_ equ $ - get_fl_ep_
 
     get_ep_index_html db "/index.html", 0
     get_len_ep_index_html equ $ - get_ep_index_html
     get_fl_ep_index_html db "templates/index.html", 0
+    get_len_fl_ep_index_html equ $ - get_fl_ep_index_html
 
     get_ep_404 db "/404", 0
     get_len_ep_404 equ $ - get_ep_404
     get_fl_ep_404 db "templates/not_found.html", 0
+    get_len_fl_ep_404 equ $ - get_fl_ep_404
 
     get_ep_about db "/about", 0
     get_len_ep_about equ $ - get_ep_about
     get_fl_ep_about db "templates/about.html", 0
+    get_len_fl_ep_about equ $ - get_fl_ep_about
 
     get_ep_favicon_ico db "/favicon.ico", 0
     get_len_ep_favicon_ico equ $ - get_ep_favicon_ico
     get_fl_ep_favicon_ico db "templates/favicon.ico", 0
+    get_len_fl_ep_favicon_ico equ $ - get_fl_ep_favicon_ico
 
     get_ep_style_css db "/style.css", 0
     get_len_ep_style_css equ $ - get_ep_style_css
     get_fl_ep_style_css db "templates/style.css", 0
+    get_len_fl_ep_style_css equ $ - get_fl_ep_style_css
 
-    get_ep_hi_o db "/hi.o", 0
-    get_len_ep_hi_o equ $ - get_ep_hi_o
-    get_fl_ep_hi_o db "templates/post_responses/bin/hello.o", 0
+    get_ep_hi db "/hi", 0
+    get_len_ep_hi equ $ - get_ep_hi
+    get_fl_ep_hi db "templates/post_responses/bin/hello.o", 0
+    get_len_fl_ep_hi equ $ - get_fl_ep_hi
 
     post_ep_bye db "/bye", 0
     post_len_ep_bye equ $ - post_ep_bye
     post_fl_ep_bye db "templates/post_responses/bye.sh", 0
+    post_len_fl_ep_bye equ $ - post_fl_ep_bye
     arg_ep_bye dq post_fl_ep_bye, 0
     resp_ep_bye db "templates/post_responses/bin/hello.o", 0
     resp_mime_ep_bye equ OS_MIME
@@ -137,9 +145,6 @@ process_file:
 
     .get:
 
-        push rsi
-        call f_process_file_ext
-        pop  rsi
         mov  r11, RESPONSE_FILE
     
         .ep_:
@@ -149,7 +154,8 @@ process_file:
             cmp  rax, 1
             jne  .ep_index_html
             mov  rdi, get_fl_ep_ 
-            ret
+            mov  r10, get_len_fl_ep_
+            jmp  .get_done
     
         .ep_index_html:
             mov  rdi, get_ep_index_html 
@@ -158,7 +164,8 @@ process_file:
             cmp  rax, 1
             jne  .ep_404
             mov  rdi, get_fl_ep_index_html 
-            ret
+            mov  r10, get_len_fl_ep_index_html
+            jmp  .get_done
     
         .ep_404:
             mov  rdi, get_ep_404 
@@ -167,7 +174,8 @@ process_file:
             cmp  rax, 1
             jne  .ep_about
             mov  rdi, get_fl_ep_404 
-            ret
+            mov  r10, get_len_fl_ep_404
+            jmp  .get_done
     
         .ep_about:
             mov  rdi, get_ep_about 
@@ -176,7 +184,8 @@ process_file:
             cmp  rax, 1
             jne  .ep_favicon_ico
             mov  rdi, get_fl_ep_about 
-            ret
+            mov  r10, get_len_fl_ep_about
+            jmp  .get_done
     
         .ep_favicon_ico:
             mov  rdi, get_ep_favicon_ico 
@@ -185,26 +194,35 @@ process_file:
             cmp  rax, 1
             jne  .ep_style_css
             mov  rdi, get_fl_ep_favicon_ico 
-            ret
+            mov  r10, get_len_fl_ep_favicon_ico
+            jmp  .get_done
     
         .ep_style_css:
             mov  rdi, get_ep_style_css 
             mov  rcx, get_len_ep_style_css
             call f_match_path
             cmp  rax, 1
-            jne  .ep_hi_o
+            jne  .ep_hi
             mov  rdi, get_fl_ep_style_css 
-            ret
+            mov  r10, get_len_fl_ep_style_css
+            jmp  .get_done
     
-        .ep_hi_o:
-            mov  rdi, get_ep_hi_o 
-            mov  rcx, get_len_ep_hi_o
+        .ep_hi:
+            mov  rdi, get_ep_hi 
+            mov  rcx, get_len_ep_hi
             call f_match_path
             cmp  rax, 1
             jne  .not_found
-            mov  rdi, get_fl_ep_hi_o 
-            ret
+            mov  rdi, get_fl_ep_hi 
+            mov  r10, get_len_fl_ep_hi
+            jmp  .get_done
     
+        .get_done:
+            mov  rsi, rdi
+            push rdi
+            call f_process_file_ext
+            pop  rdi
+            ret
     .post:
 
         mov  r11, RESPONSE_EXEC

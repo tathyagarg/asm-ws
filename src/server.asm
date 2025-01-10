@@ -296,7 +296,6 @@ parse_headers:
 
 process_request:
     mov  rsi, path
-    mov  r10, [path_len]
     movzx r9, byte [method]
     call process_file
     push r9
