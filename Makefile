@@ -19,22 +19,24 @@ ASM_OPTIMIZE = -O3
 PYTHON = python3.13
 PYTHON_FILE = src/routing/dynamic.py
 
-RESPONSES_DIR = templates/post_responses
+TEMPLATES_DIR ?= templates
+
+RESPONSES_DIR = $(TEMPLATES_DIR)/post_responses
 
 CC = gcc
-POST_BIN = templates/post_responses/bin
+POST_BIN = $(TEMPLATES_DIR)/post_responses/bin
 
 # ============= Configurations =============
 PORT = `cat PORT` # Random number because im quirky
-ERR_LOG := tmp/err.log
-OUT_LOG := tmp/out.log
+ERR_LOG ?= tmp/err.log
+OUT_LOG ?= tmp/out.log
 
 .PHONY: all
 all: req dyn responses asm run
 
 .PHONY: req
 req:
-	mkdir -p templates/post_responses/bin
+	mkdir -p $(TEMPLATES_DIR)/post_responses/bin
 	mkdir -p tmp
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(BIN_DIR)
@@ -54,7 +56,7 @@ clean:
 	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/$(BIN)
 
 dyn:
-	$(PYTHON) $(PYTHON_FILE)
+	$(PYTHON) $(PYTHON_FILE) $(TEMPLATES_DIR)
 
 responses:
 	for src_file in "$(RESPONSES_DIR)"/*.c; do\

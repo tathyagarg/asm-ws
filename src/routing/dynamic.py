@@ -1,12 +1,15 @@
 import re
+import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum
 
-RFILE = "templates/.endpoints"
+templates_dir = sys.argv[1] if len(sys.argv) > 1 else "templates"
+
+RFILE = f"{templates_dir}/.endpoints"
 WFILE = "src/routing/routing.asm"
 
-DATA = """section .data
+DATA = f"""section .data
     NULL          equ 0
 
     ; ============================== File Extensions ==============================
@@ -80,7 +83,7 @@ DATA = """section .data
     DELETE equ 3
 
     ; ============================== File Locations ==============================
-    get_fl_not_found db "templates/not_found.html", 0
+    get_fl_not_found db "{templates_dir}/not_found.html", 0
     
 """
 
@@ -159,8 +162,8 @@ EP_FORMATS = {
 }
 
 METHOD_PREFIXES = {
-    "get": "templates",
-    "post": "templates/post_responses",
+    "get": templates_dir,
+    "post": f"{templates_dir}/post_responses",
 }
 
 
