@@ -27,7 +27,7 @@ CC = gcc
 POST_BIN = $(TEMPLATES_DIR)/post_responses/bin
 
 # ============= Configurations =============
-PORT = `cat PORT` # Random number because im quirky
+PORT ?= 35323 # Random number because im quirky
 ERR_LOG ?= tmp/err.log
 OUT_LOG ?= tmp/out.log
 
