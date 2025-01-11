@@ -253,6 +253,14 @@ def parser(rfile):
                 f.write(f"            pop  rdi\n")
                 f.write(f"            ret\n")
 
+        if str(Method.GET) not in routes:
+            f.write(f"    .get:\n")
+            f.write(f"        jmp  .not_found\n")
+
+        if str(Method.POST) not in routes:
+            f.write(f"    .post:\n")
+            f.write(f"        jmp  .not_found\n")
+
         f.write(f"    .not_found:\n")
         f.write(f"        mov  rdi, get_fl_not_found\n")
         f.write(f"        mov  r9, HTTP_404\n")

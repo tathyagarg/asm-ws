@@ -59,9 +59,11 @@ dyn:
 	$(PYTHON) $(PYTHON_FILE) $(TEMPLATES_DIR)
 
 responses:
+ifneq ("$(wildcard $(RESPONSES_DIR)/*.c)", "")
 	for src_file in "$(RESPONSES_DIR)"/*.c; do\
 		$(CC) $$src_file -o $(POST_BIN)/$$(basename $$src_file .c).o -O3;\
 	done
+endif
 
 kill:
 	pkill -9 -x $(BIN)
