@@ -12,7 +12,7 @@ SRC = server.asm
 ROUTING = routing/routing.asm
 OBJ = $(SRC:.asm=.o)
 ROUTING_OBJ = routing.o
-BIN = server
+BIN ?= server
 ASMFLAGS = -f elf64
 ASM_OPTIMIZE = -O3
 
