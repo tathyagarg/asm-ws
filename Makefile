@@ -66,4 +66,4 @@ ifneq ("$(wildcard $(RESPONSES_DIR)/*.c)", "")
 endif
 
 kill:
-	pkill -9 -x $(BIN)
+	-pkill -9 -x $(BIN)
