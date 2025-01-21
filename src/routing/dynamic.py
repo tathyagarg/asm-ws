@@ -34,7 +34,7 @@ DATA = f"""section .data
     OS_EXT        db "o", 0
     OS_EXT_LEN    equ $ - OS_EXT
 
-    TTF_EXT        db "ttf", 0
+    TTF_EXT        db "ftt", 0
     TTF_EXT_LEN    equ $ - TTF_EXT
 
     NO_EXT        db "/", 0
