@@ -116,6 +116,13 @@ f_process_file_ext:
     cmp  rax, 1
     je   .os
 
+    mov  rdi, TTF_EXT 
+    mov  rcx, r10
+    mov  r9,  TTF_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .ttf
+
     mov  rdi, NO_EXT
     mov  rcx, r10
     mov  r9,  NO_EXT_LEN
@@ -156,6 +163,11 @@ f_process_file_ext:
     .os:
         mov  r9, OS_MIME
         mov  r8, OS_MIME_LEN
+        jmp .found
+
+    .ttf:
+        mov  r9, TTF_MIME
+        mov  r8, TTF_MIME_LEN
         jmp .found
 
     ; Add HTTP 200 Headers

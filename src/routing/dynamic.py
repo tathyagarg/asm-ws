@@ -34,6 +34,9 @@ DATA = f"""section .data
     OS_EXT        db "o", 0
     OS_EXT_LEN    equ $ - OS_EXT
 
+    TTF_EXT        db "ttf", 0
+    TTF_EXT_LEN    equ $ - TTF_EXT
+
     NO_EXT        db "/", 0
     NO_EXT_LEN    equ $ - NO_EXT
 
@@ -71,6 +74,9 @@ DATA = f"""section .data
 
     OS_MIME          db "application/octet-stream"
     OS_MIME_LEN      equ $ - OS_MIME
+
+    TTF_MIME         db "font/ttf"
+    TTF_MIME_LEN     equ $ - TTF_MIME
 
     ; ============================== Response Types ==============================
     RESPONSE_FILE  equ 0
