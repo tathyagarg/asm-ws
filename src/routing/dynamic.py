@@ -37,7 +37,7 @@ DATA = f"""section .data
     SVG_EXT       db "gvs", 0
     SVG_EXT_LEN   equ $ - SVG_EXT
 
-    TTF_EXT       db "ftt", -1
+    TTF_EXT       db "ftt", 0
     TTF_EXT_LEN   equ $ - SVG_EXT
 
     NO_EXT        db "/", 0
