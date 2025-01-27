@@ -34,8 +34,11 @@ DATA = f"""section .data
     OS_EXT        db "o", 0
     OS_EXT_LEN    equ $ - OS_EXT
 
-    TTF_EXT        db "ftt", 0
-    TTF_EXT_LEN    equ $ - TTF_EXT
+    SVG_EXT       db "gvs", 0
+    SVG_EXT_LEN   equ $ - SVG_EXT
+
+    TTF_EXT       db "ftt", 0
+    TTF_EXT_LEN   equ $ - TTF_EXT
 
     NO_EXT        db "/", 0
     NO_EXT_LEN    equ $ - NO_EXT
@@ -74,6 +77,9 @@ DATA = f"""section .data
 
     OS_MIME          db "application/octet-stream"
     OS_MIME_LEN      equ $ - OS_MIME
+
+    SVG_MIME         db "image/svg+xml"
+    SVG_MIME_LEN     equ $ - SVG_MIME
 
     TTF_MIME         db "font/ttf"
     TTF_MIME_LEN     equ $ - TTF_MIME
