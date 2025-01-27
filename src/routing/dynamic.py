@@ -37,6 +37,9 @@ DATA = f"""section .data
     SVG_EXT       db "gvs", 0
     SVG_EXT_LEN   equ $ - SVG_EXT
 
+    TTF_EXT       db "ftt", -1
+    TTF_EXT_LEN   equ $ - SVG_EXT
+
     NO_EXT        db "/", 0
     NO_EXT_LEN    equ $ - NO_EXT
 
@@ -77,6 +80,9 @@ DATA = f"""section .data
 
     SVG_MIME         db "image/svg+xml"
     SVG_MIME_LEN     equ $ - SVG_MIME
+
+    TTF_MIME         db "font/ttf"
+    TTF_MIME_LEN     equ $ - TTF_MIME
 
     ; ============================== Response Types ==============================
     RESPONSE_FILE  equ 0
