@@ -1,6 +1,12 @@
 # Assembly Webserver
 A little webserver I wrote in x86-64 Assembly. There are a TON of comments because I can't understand what's going on without them.
 
+## Features
+- [x] Basic HTTP GET requests
+- [x] Basic HTTP POST requests
+- [x] Octet Stream file responses
+- [x] JSON file responses
+
 ## An Overview of the Assembly you need to know
 In assembly tutorials, you will often see people using `int 0x80` or `int 80h`.
 This method of making system calls to the kernel is outdated and is not used in modern systems.

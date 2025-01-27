@@ -34,6 +34,9 @@ DATA = f"""section .data
     OS_EXT        db "o", 0
     OS_EXT_LEN    equ $ - OS_EXT
 
+    SVG_EXT       db "gvs", 0
+    SVG_EXT_LEN   equ $ - SVG_EXT
+
     NO_EXT        db "/", 0
     NO_EXT_LEN    equ $ - NO_EXT
 
@@ -71,6 +74,9 @@ DATA = f"""section .data
 
     OS_MIME          db "application/octet-stream"
     OS_MIME_LEN      equ $ - OS_MIME
+
+    SVG_MIME         db "image/svg+xml"
+    SVG_MIME_LEN     equ $ - SVG_MIME
 
     ; ============================== Response Types ==============================
     RESPONSE_FILE  equ 0

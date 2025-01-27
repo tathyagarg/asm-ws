@@ -116,6 +116,13 @@ f_process_file_ext:
     cmp  rax, 1
     je   .os
 
+    mov  rdi, SVG_EXT 
+    mov  rcx, r10
+    mov  r9,  SVG_EXT_LEN
+    call f_match_file_ext
+    cmp  rax, 1
+    je   .svg
+
     mov  rdi, NO_EXT
     mov  rcx, r10
     mov  r9,  NO_EXT_LEN
@@ -156,6 +163,11 @@ f_process_file_ext:
     .os:
         mov  r9, OS_MIME
         mov  r8, OS_MIME_LEN
+        jmp .found
+
+    .svg:
+        mov  r9, SVG_MIME
+        mov  r8, SVG_MIME_LEN
         jmp .found
 
     ; Add HTTP 200 Headers
