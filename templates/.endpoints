@@ -11,4 +11,4 @@ POST
 # This EP was never gonna work lol
 # /hello bin/hello.o tmp/output.response JSON
 # /bye bye.sh tmp/output.response JSON
-/bye bye.sh templates/post_responses/bin/hello.o OS
+/bye bye.sh templates/post_responses/bin/hello.o O
