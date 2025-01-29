@@ -387,17 +387,19 @@ def routing_parser(rfile):
 
 def fs_parser(rfile: str):
     file_exts: set[str] = set()
+    curr_method: Method | None = None
     with open(rfile) as f:
         lines = f.readlines()
         for line in lines:
-            if (
-                not line.strip()
-                or line.startswith("#")
-                or re.match(r"^(GET|POST|PUT|DELETE)$", line)
-            ):
+            if m := re.match(r"^(GET|POST|PUT|DELETE)$", line):
+                curr_method = Method[m.group(0)]
                 continue
 
-            file_exts.add(line.strip().rsplit(".", 1)[1].split(" ")[0])
+            if not line.strip() or line.startswith("#"):
+                continue
+
+            if curr_method == Method.GET:
+                file_exts.add(line.strip().rsplit(".", 1)[1].split(" ")[0])
 
     with open(FS_WFILE, "w") as f:
         f.write(FS_TEXT)
