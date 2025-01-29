@@ -20,10 +20,10 @@ section .data
     startup_msg_len equ $ - startup_msg
 
     ; ============= Debug =============
-    %define DEBUG_HEADERS    1
+    %define DEBUG_HEADERS    0
     %define DEBUG_METHOD     1
     %define DEBUG_PATH       1
-    %define DEBUG_RESP       1
+    %define DEBUG_RESP       0
 
     ; ============= Files =============
     file_ptr    dq      0
@@ -284,7 +284,7 @@ parse_headers:
                 jmp  ._print
 
             ._print:
-                call printLF
+                call print
         %endif
 
     .path:

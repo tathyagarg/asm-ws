@@ -263,7 +263,7 @@ EP_FORMATS = {
     """,
     "post": """
             mov  rdi, post_{ep}
-            mov  rcx, r10
+            mov  rcx, post_len_{ep} 
             call f_match_path
             cmp  rax, 1
             jne  .{next_ep}
